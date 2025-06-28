@@ -3,7 +3,7 @@ from urllib.parse import urlparse, parse_qs
 import pandas as pd
 
 # 🔐 Coloca tu API key aquí:
-API_KEY = "AIzaSyCLdqLgwT_npnKOsBuGgE0uKYQYRMWNE4Y"
+API_KEY = "TU_API_KEY_AQUI" 
 
 # Construye el cliente de la API
 youtube = build("youtube", "v3", developerKey=API_KEY)
