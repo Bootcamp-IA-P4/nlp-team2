@@ -1,7 +1,7 @@
 schema_video_urls= {
     "$jsonSchema": {
         "bsonType": "object",
-        "required": ["title", "description", "url"],
+        "required": ["video_id","title", "description", "url"],
         "properties": {
             "video_id": {
                 "bsonType": "string",
