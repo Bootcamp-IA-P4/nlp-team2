@@ -38,14 +38,14 @@ class MongoDbConnection:
             self.connect()
         return self._database[collection_name]
 
-    def create_collection(self, collection_name):
-        if self._database is None:
-            self.connect()
-        if collection_name not in self._database.list_collection_names():
-            self._database.create_collection(collection_name)
-            print(f"✅ Collection '{collection_name}' created successfully")
-        else:
-            print(f"ℹ️ Collection '{collection_name}' already exists")
+    # def create_collection(self, collection_name):
+    #     if self._database is None:
+    #         self.connect()
+    #     if collection_name not in self._database.list_collection_names():
+    #         self._database.create_collection(collection_name)
+    #         print(f"✅ Collection '{collection_name}' created successfully")
+    #     else:
+    #         print(f"ℹ️ Collection '{collection_name}' already exists")
 
     def save_message_to_mongo(self, message_data, collection_name=None):
         if isinstance(collection_name, str):
@@ -54,6 +54,34 @@ class MongoDbConnection:
         else:
             raise ValueError("collection_name debe ser un string con el nombre de la colección")
 
+    def create_collection_with_schema(self, collection_name, schema):
+        if self._database is None:
+            self.connect()
+
+        if collection_name not in self._database.list_collection_names():
+            self._database.create_collection(
+                collection_name,
+                validator=schema,
+                validationLevel="strict"
+            )
+            print(f"✅ Collection '{collection_name}' created with schema")
+        else:
+            collection = self.get_collection(collection_name)
+            current_schema = collection.options().get('validator', {})
+            
+            if current_schema != schema:
+                collection.drop()
+                print(f"ℹ️ Collection '{collection_name}' exists with a different schema, dropping and recreating it")
+            else:
+                print(f"ℹ️ Collection '{collection_name}' already exists with the same schema")
+
+    def save_message_to_mongo(self, message_data, collection_name=None):
+        if isinstance(collection_name, str):
+            collection = self.get_collection(collection_name)
+            collection.insert_one(message_data)
+        else:
+            raise ValueError("collection_name must be a string with the name of the collection")
+    
     def close(self):
         if self._client:
             self._client.close()

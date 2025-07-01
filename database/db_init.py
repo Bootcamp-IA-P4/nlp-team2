@@ -1,8 +1,11 @@
 
 from database import db_config as mdb
+from database import models
 from dotenv import load_dotenv
 import os
 load_dotenv()
+
+
 
 
 if __name__ == "__main__":
@@ -25,12 +28,13 @@ if __name__ == "__main__":
             raise e
         # Create or access the collection
         try:
-            source_collection_name = os.getenv("MONGO_SOURCE_COLLECTION")
-            target_collection_name = os.getenv("MONGO_TARGET_COLLECTION")
-            if not source_collection_name and not target_collection_name:
-                raise ValueError("Environment variables MONGO_SOURCE_COLLECTION nnd MONGO_TARGET_COLLECTION must be set")
-            source_collection = mongo_db.create_collection(source_collection_name)
-            target_collection = mongo_db.create_collection(target_collection_name)
+            for collection in models.get_collections():
+                schema = models.get_schema_for_collection(collection)
+                print(f"🔄 Creating collection '{collection}' with schema...")
+                mongo_db.create_collection_with_schema(collection, schema)
+                
+                
+
             
         except Exception as e:
             raise e
