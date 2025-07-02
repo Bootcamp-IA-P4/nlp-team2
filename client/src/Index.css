@@ -8,43 +8,72 @@
     margin: 0;
     min-height: 100vh;
     background-color: #edf2f4;
+    transition: background-color 0.3s ease;
+  }
+  
+  .dark body {
+    background-color: #111827;
   }
 }
 
 @layer components {
-  .sidebar-item {
-    @apply flex items-center px-4 py-3 text-white hover:bg-accent-500 hover:text-white transition-colors duration-200 cursor-pointer;
-  }
-  
-  .sidebar-item.active {
-    @apply bg-accent-500 text-white border-r-4 border-accent-300;
-  }
-  
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-neutral-200 p-6;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-300;
   }
   
   .metric-card {
-    @apply bg-white rounded-lg shadow-sm border border-neutral-200 p-4 hover:shadow-md transition-shadow;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-all duration-300;
   }
   
+  /* Estilos específicos para títulos */
+  .page-title {
+    @apply text-2xl font-bold text-gray-800 dark:text-gray-100;
+  }
+  
+  .section-title {
+    @apply text-lg font-semibold text-gray-800 dark:text-gray-100;
+  }
+  
+  .metric-label {
+    @apply text-sm font-medium text-gray-600 dark:text-gray-400;
+  }
+  
+  .metric-value-primary {
+    @apply text-2xl font-bold text-primary-500 dark:text-accent-400;
+  }
+  
+  .metric-value-danger {
+    @apply text-2xl font-bold text-secondary-500 dark:text-secondary-400;
+  }
+  
+  .metric-value-success {
+    @apply text-2xl font-bold text-green-600 dark:text-green-400;
+  }
+  
+  /* Botones con colores de la paleta */
   .btn-primary {
-    @apply bg-primary-500 text-white hover:bg-primary-600 px-4 py-2 rounded-lg transition-colors;
+    @apply bg-primary-500 hover:bg-primary-600 dark:bg-accent-500 dark:hover:bg-accent-600 text-white px-4 py-2 rounded-lg transition-colors;
   }
   
-  .btn-secondary {
-    @apply bg-secondary-500 text-white hover:bg-secondary-600 px-4 py-2 rounded-lg transition-colors;
+  .btn-danger {
+    @apply bg-secondary-500 hover:bg-secondary-600 dark:bg-secondary-400 dark:hover:bg-secondary-500 text-white px-4 py-2 rounded-lg transition-colors;
   }
   
-  .btn-accent {
-    @apply bg-accent-500 text-white hover:bg-accent-600 px-4 py-2 rounded-lg transition-colors;
+  /* Enlaces con estilo */
+  .link-primary {
+    @apply text-secondary-500 hover:text-secondary-600 dark:text-secondary-400 dark:hover:text-secondary-300 transition-colors;
   }
   
-  .text-danger {
-    @apply text-secondary-500;
+  /* Tabla con mejor contraste */
+  .table-header {
+    @apply text-left py-2 px-4 font-medium text-gray-600 dark:text-gray-300;
   }
   
-  .text-success {
-    @apply text-accent-500;
+  .table-cell {
+    @apply py-3 px-4 text-gray-600 dark:text-gray-400;
+  }
+  
+  .table-cell-primary {
+    @apply py-3 px-4 text-gray-900 dark:text-gray-100;
   }
 }
