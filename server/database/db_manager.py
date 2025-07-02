@@ -45,8 +45,3 @@ def insert_video_from_scrapper(data):
     session.add(video)
     session.commit()
     session.close()
-
-
-with open("scrap.json", "r", encoding="utf-8") as f:
-    data = json.load(f)
-insert_video_from_scrapper(data)
