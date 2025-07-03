@@ -1,3 +1,4 @@
+# Python
 .venv
 venv
 __pycache__
@@ -7,13 +8,45 @@ __pycache__
 *.pkl
 *.db
 *.sqlite3
+
+# Environment
 .env
 .DS_Store
 .env*
 /.env
+
+# Node
 npm-debug.log
 node_modules
-*/mlruns
-*/results_distilbert-base-uncased
-*/results_bert-base-uncased
-/results_distilbert-base-uncased
+
+# MLflow y resultados
+*/mlruns/
+mlruns/
+**/mlruns/
+*/results_*/
+results_*/
+**/results_*/
+
+# Modelos entrenados
+*.pth
+*.pt
+*.h5
+*.hdf5
+*.safetensors
+models/
+*/models/
+**/models/
+
+# Logs y outputs
+logs/
+*.log
+outputs/
+checkpoints/
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Data (si son archivos grandes)
+# data/processed/
+# data/external/
