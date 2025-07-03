@@ -1,6 +1,11 @@
-# Base de datos
-SQLAlchemy
-psycopg2-binary
+pandas
+spacy
+jupyter
+spacytextblob
+matplotlib
+seaborn
+requests
+scikit-learn
 dotenv
 # MLflow and experiment tracking
 mlflow>=2.0.0
