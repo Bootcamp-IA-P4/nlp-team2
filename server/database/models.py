@@ -14,9 +14,21 @@ class Video(Base):
     description = Column(Text)
     author = Column(String)
     total_threads = Column(Integer)
-    inserted_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
 
-    comments = relationship("Thread", back_populates="video", cascade="all, delete-orphan")
+    threads = relationship("Thread", back_populates="video", cascade="all, delete-orphan")
+    requests = relationship("Request", back_populates="video", cascade="all, delete-orphan")
+
+
+class Request(Base):
+    __tablename__ = 'requests'
+
+    id = Column(Integer, primary_key=True)
+    fk_video_id = Column(Integer, ForeignKey('videos.id'), nullable=False)
+    request_date = Column(DateTime, nullable=False)
+
+    video = relationship("Video", back_populates="requests")
+    threads = relationship("Thread", back_populates="request", cascade="all, delete-orphan")
 
 
 class Thread(Base):
@@ -24,8 +36,20 @@ class Thread(Base):
 
     id = Column(Integer, primary_key=True)
     fk_video_id = Column(Integer, ForeignKey('videos.id'), nullable=False)
-    author = Column(String)
+    fk_request_id = Column(Integer, ForeignKey('requests.id'), nullable=False)
+    fk_author_id = Column(Integer, ForeignKey('authors.id'), nullable=True)
     comment = Column(Text)
     inserted_at = Column(DateTime, nullable=False)
 
-    video = relationship("Video", back_populates="comments")
+    video = relationship("Video", back_populates="threads")
+    request = relationship("Request", back_populates="threads")
+    author_obj = relationship("Author", back_populates="threads")
+
+
+class Author(Base):
+    __tablename__ = 'authors'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True, nullable=False)
+
+    threads = relationship("Thread", back_populates="author_obj", cascade="all, delete-orphan")
