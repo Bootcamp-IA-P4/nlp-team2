@@ -24,6 +24,34 @@ def create_tables():
     Base.metadata.create_all(engine)
     print("Tables created successfully.")
 
+
+import subprocess
+import os
+from datetime import datetime
+
+def dump_database(output_file=None):
+    # Carga de variables desde .env o configuración
+    db_url = os.getenv("POSTGRES_URL")  # por ejemplo: postgresql://user:password@localhost:5432/dbname
+
+    if not output_file:
+        now = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_file = f"db_dump_{now}.sql"
+
+    print(f"📦 Dumping database to {output_file} ...")
+
+    # Descomponer URL en partes si necesitas
+
+    # Ejecutar pg_dump
+    try:
+        subprocess.run(
+            ["pg_dump", db_url, "-f", output_file],
+            check=True
+        )
+        print("✅ Dump completed successfully.")
+    except subprocess.CalledProcessError as e:
+        print("❌ Error during pg_dump:", e)
+
+
 def insert_new_video(session,data,now):
             # Crear nuevo video si no existe
         video = Video(
@@ -101,12 +129,12 @@ def main():
     parser = argparse.ArgumentParser(description="Database manager script")
     parser.add_argument("--file", type=str, help="Ruta del archivo JSON", default="scrap.json")
     parser.add_argument("--recreate", action="store_true", help="Eliminar y recrear tablas")
-
     args = parser.parse_args()
 
     if args.recreate:
         create_tables()
-
+        exit()
+   
     with open(args.file, "r", encoding="utf-8") as f:
         data = json.load(f)
 
