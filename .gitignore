@@ -14,3 +14,6 @@ __pycache__
 npm-debug.log
 node_modules
 */mlruns
+*/results_distilbert-base-uncased
+*/results_bert-base-uncased
+/results_distilbert-base-uncased
