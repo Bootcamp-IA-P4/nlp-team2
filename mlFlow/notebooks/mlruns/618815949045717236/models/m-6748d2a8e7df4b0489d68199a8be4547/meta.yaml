@@ -1,0 +1,10 @@
+artifact_location: file:///c:/Users/usuario/Desktop/bcia/nlp-team2/mlFlow/notebooks/mlruns/618815949045717236/models/m-6748d2a8e7df4b0489d68199a8be4547/artifacts
+creation_timestamp: 1751461346537
+experiment_id: '618815949045717236'
+last_updated_timestamp: 1751461349038
+model_id: m-6748d2a8e7df4b0489d68199a8be4547
+model_type: null
+name: vectorizer
+source_run_id: 4ed231ba184b4fd8966b559b0dfd385e
+status: 2
+status_message: null

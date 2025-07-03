@@ -13,3 +13,4 @@ __pycache__
 /.env
 npm-debug.log
 node_modules
+*/mlruns

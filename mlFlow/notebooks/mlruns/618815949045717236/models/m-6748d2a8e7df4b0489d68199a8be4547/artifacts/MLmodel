@@ -1,0 +1,14 @@
+artifact_path: file:///c:/Users/usuario/Desktop/bcia/nlp-team2/mlFlow/notebooks/mlruns/618815949045717236/models/m-6748d2a8e7df4b0489d68199a8be4547/artifacts
+flavors:
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.0
+mlflow_version: 3.1.1
+model_id: m-6748d2a8e7df4b0489d68199a8be4547
+model_size_bytes: 143188
+model_uuid: m-6748d2a8e7df4b0489d68199a8be4547
+prompts: null
+run_id: 4ed231ba184b4fd8966b559b0dfd385e
+utc_time_created: '2025-07-02 13:02:26.576534'
