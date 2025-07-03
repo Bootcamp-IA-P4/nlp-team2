@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from .models import Base, Video, Thread , Request, Author
 from dotenv import load_dotenv
 import os
+import argparse
 
 load_dotenv()
 
@@ -48,7 +49,7 @@ def update_video(video,data,now):
         video.updated_at = now  # O usa updated_at si tienes
 
 def insert_video_from_scrapper(data):
-    print("📽 Inserting data from scrapper ...")
+    print("📽 Processing video request ...")
     session = open_session()
     now = datetime.now()
 
@@ -93,10 +94,23 @@ def insert_video_from_scrapper(data):
     session.commit()
     session.close()
 
-    print("💾 Data inserted/updated successfully with new Request.")
+    print("💾 Data for current Request succesfully inserted/updated.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Database manager script")
+    parser.add_argument("--file", type=str, help="Ruta del archivo JSON", default="scrap.json")
+    parser.add_argument("--recreate", action="store_true", help="Eliminar y recrear tablas")
+
+    args = parser.parse_args()
+
+    if args.recreate:
+        create_tables()
+
+    with open(args.file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    insert_video_from_scrapper(data)
 
 if __name__ == "__main__":
-    with open("scrap.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-    #create_tables()
-    insert_video_from_scrapper(data)
+    main()
