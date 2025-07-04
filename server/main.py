@@ -45,5 +45,5 @@ async def read_root():
 @app.get("/"+setting.version+"/prediction_detail/{id}")
 async def read_root(id: int):
     return {
-        "prediction": database.get_request(id),
+        "prediction": database.get_request_by_id(id),
     }
