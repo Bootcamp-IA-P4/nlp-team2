@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, joinedload
 from .models import Base, Video, Thread , Request, Author
 from dotenv import load_dotenv
 import os
@@ -121,7 +121,8 @@ def insert_video_from_scrapper(data):
 def get_request_list():
     try:
         session = open_session()
-        requests = session.query(Request).join(Video, Request.fk_video_id == Video.id).all()
+        #requests = session.query(Request).join(Video, Request.fk_video_id == Video.id).all()
+        requests = session.query(Request).options(joinedload(Request.video)).all()
         session.close()
         return requests
     except Exception as e:
@@ -130,7 +131,7 @@ def get_request_list():
 def get_request_by_id(request_id):
     try:
         session = open_session()
-        request = session.query(Request).join(Video, Request.fk_video_id == Video.id).filter_by(id=request_id).first()
+        request =  session.query(Request).options(joinedload(Request.video)).filter(Request.id == request_id).first()
         session.close()
         return request
     except Exception as e:
