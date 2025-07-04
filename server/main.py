@@ -36,9 +36,14 @@ async def read_root(data: dict):
         "prediction_request": ""
         }
 
-@app.post("/"+setting.version+"/prediction_list")
+@app.get("/"+setting.version+"/prediction_list")
 async def read_root():
     return {
-        "prediction_list": database.get_all_request(),
+        "prediction_list": database.get_request_list(),
     }
-    
+
+@app.get("/"+setting.version+"/prediction_detail/{id}")
+async def read_root(id: int):
+    return {
+        "prediction": database.get_request_by_id(id),
+    }
