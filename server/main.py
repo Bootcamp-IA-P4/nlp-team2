@@ -1,16 +1,16 @@
 from fastapi import FastAPI
 import server.database.db_manager as database
 import server.scraper.scrp as scrp
-from app.core.config import setting
+from server.core.config import setting
 
 
 
-print   ("🟢 Iniciando la extracción de comentarios de YouTube..."  )
-retorno = scrp.scrape_youtube_comments("https://www.youtube.com/watch?v=8kZMBVvK-gg")
+# print   ("🟢 Iniciando la extracción de comentarios de YouTube..."  )
+# retorno = scrp.scrape_youtube_comments("https://www.youtube.com/watch?v=8kZMBVvK-gg")
 
-database.insert_video_from_scrapper(retorno)
+# database.insert_video_from_scrapper(retorno)
 
-print("🟢 Extracción completada."  )
+# print("🟢 Extracción completada."  )
 
 
 app = FastAPI(
@@ -19,7 +19,26 @@ app = FastAPI(
     description=setting.description
     )
 
+@app.get("/")
+def read_root():
+    return {
+        "Título": setting.title,
+        "Version": setting.version,
+        "Descripcion": setting.description,
+        "Autores": setting.authors
+        }
 
-@app.get(f"/{setting.version}/prediction_request")
-def read_root(data: dict):
-    return {"mensaje": data["url"]}
+@app.post("/"+setting.version+"/prediction_request")
+async def read_root(data: dict):
+    scrape_data = scrp.scrape_youtube_comments(data["url"])
+    database.insert_video_from_scrapper(scrape_data)
+    return {
+        "prediction_request": ""
+        }
+
+@app.post("/"+setting.version+"/prediction_list")
+async def read_root():
+    return {
+        "prediction_list": database.get_all_request(),
+    }
+    
