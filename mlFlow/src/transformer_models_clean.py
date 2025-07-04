@@ -182,7 +182,7 @@ def run_transformer_experiments():
     print("📊 Cargando datos para transformers...")
     from src.data_preprocessing import load_and_preprocess_data, prepare_train_test_split
     
-    df, toxicity_columns = load_and_preprocess_data('data/raw/youtoxic_english_1000.csv')
+    df, toxicity_columns = load_and_preprocess_data('data/raw/hatespeech.csv')
     X_train, X_test, y_train, y_test = prepare_train_test_split(df, toxicity_columns)
     
     print(f"📈 Datos preparados para transformers:")
@@ -196,12 +196,39 @@ def run_transformer_experiments():
     # Configuraciones de modelos transformer (empezar con modelo más liviano)
     transformer_configs = [
         {
-            "model_name": "distilbert-base-uncased",
-            "num_epochs": 2,  # Pocas épocas para demo
-            "batch_size": 8,  # Batch pequeño por memoria
-            "learning_rate": 2e-5
-        }
-    ]
+        "model_name": "distilbert-base-uncased",
+        "num_epochs": 2,
+        "batch_size": 8,
+        "learning_rate": 2e-5
+    },
+    # NUEVAS CONFIGURACIONES OPTIMIZADAS
+    {
+        "model_name": "distilbert-base-uncased",
+        "num_epochs": 4,  # Más epochs
+        "batch_size": 8,
+        "learning_rate": 3e-5  # Learning rate más alto
+    },
+    {
+        "model_name": "distilbert-base-uncased", 
+        "num_epochs": 3,
+        "batch_size": 16,  # Batch más grande
+        "learning_rate": 2e-5
+    },
+    # BERT BASE (más potente)
+    {
+        "model_name": "bert-base-uncased",
+        "num_epochs": 3,
+        "batch_size": 4,  # Batch pequeño por memoria
+        "learning_rate": 2e-5
+    },
+    # RoBERTa (estado del arte)
+    {
+        "model_name": "roberta-base",
+        "num_epochs": 3,
+        "batch_size": 4,
+        "learning_rate": 1e-5  # LR más conservador para RoBERTa
+    }
+]
     
     results = []
     successful_experiments = 0

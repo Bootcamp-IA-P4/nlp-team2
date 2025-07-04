@@ -102,7 +102,7 @@ def run_experiments():
     
     # Cargar datos
     print("📊 Cargando datos...")
-    df, toxicity_columns = load_and_preprocess_data('data/raw/youtoxic_english_1000.csv')
+    df, toxicity_columns = load_and_preprocess_data('data/raw/hatespeech.csv')
     X_train, X_test, y_train, y_test = prepare_train_test_split(df, toxicity_columns)
     
     print(f"\nDatos preparados:")
