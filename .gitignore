@@ -34,9 +34,8 @@ results_*/
 *.h5
 *.hdf5
 *.safetensors
-models/
-*/models/
-**/models/
+mlFlow/models/
+
 
 # Logs y outputs
 logs/
