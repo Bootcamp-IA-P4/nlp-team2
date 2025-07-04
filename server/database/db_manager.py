@@ -122,6 +122,7 @@ def insert_video_from_scrapper(data):
     session.commit()
     session.close()
 
+
     print("💾 Data for current Request succesfully inserted/updated.")
 
 def get_request_list():
@@ -153,3 +154,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
