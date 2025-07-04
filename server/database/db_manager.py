@@ -125,6 +125,17 @@ def insert_video_from_scrapper(data):
 
     print("💾 Data for current Request succesfully inserted/updated.")
 
+def get_request_list():
+    session = open_session()
+    requests = session.query(Request).all()
+    session.close()
+    return requests
+
+def get_request_by_id(request_id):
+    session = open_session()
+    request = session.query(Request).filter_by(id=request_id).first()
+    session.close()
+    return request
 
 def main():
     parser = argparse.ArgumentParser(description="Database manager script")
