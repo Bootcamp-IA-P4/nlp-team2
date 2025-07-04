@@ -127,13 +127,13 @@ def insert_video_from_scrapper(data):
 
 def get_request_list():
     session = open_session()
-    requests = session.query(Request).all()
+    requests = session.query(Request).join(Video, Request.fk_video_id == Video.id).all()
     session.close()
     return requests
 
 def get_request_by_id(request_id):
     session = open_session()
-    request = session.query(Request).filter_by(id=request_id).first()
+    request = session.query(Request).join(Video, Request.fk_video_id == Video.id).filter_by(id=request_id).first()
     session.close()
     return request
 
