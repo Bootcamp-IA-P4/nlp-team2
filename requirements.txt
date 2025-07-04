@@ -7,4 +7,19 @@ seaborn
 requests
 scikit-learn
 dotenv
+# MLflow and experiment tracking
+mlflow>=2.0.0
+# NLP and Sentiment Analysis
+vaderSentiment
+textblob
+nltk
+# Machine Learning
+torch>=2.0.0
+transformers>=4.20.0
+scikit-multilearn
+# Data visualization
+wordcloud
+plotly
+# Utilities
+tqdm
 
