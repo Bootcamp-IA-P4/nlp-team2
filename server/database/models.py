@@ -36,8 +36,8 @@ class Request(Base):
     request_date = Column(DateTime, nullable=False)
 
     video = relationship("Video", back_populates="requests")
-    threads = relationship("Thread", back_populates="request", cascade="all, delete-orphan")
     request_threads = relationship("RequestThread", back_populates="request", cascade="all, delete-orphan")
+    threads = relationship("Thread", secondary="request_threads", viewonly=True)
 
 class Thread(Base):
     __tablename__ = 'threads'
@@ -58,7 +58,6 @@ class Thread(Base):
     replies_count = Column(Integer, default=0)
 
     video = relationship("Video", back_populates="threads")
-    request = relationship("Request", back_populates="threads")
     author_obj = relationship("Author", back_populates="threads")
     request_threads = relationship("RequestThread", back_populates="thread", cascade="all, delete-orphan")
 

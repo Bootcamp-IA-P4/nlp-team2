@@ -101,11 +101,9 @@ def create_thread(session, video, request, thread_data, now, parent_comment_id=N
 
     thread = Thread(
         fk_video_id=video.id,
-        fk_request_id=request.id,
         fk_author_id=author.id,
         parent_comment_id=parent_comment_id,
         comment=thread_data.get("comment"),
-        inserted_at=now,
         likes=thread_data.get("likes", 0),
         published_time=thread_data.get("published_time"),
         emoji_count=thread_data.get("emoji_count", 0),
