@@ -46,14 +46,20 @@ def insert_new_video(session,data,now):
                 session.flush()
         # Crear nuevo video si no existe
             video = Video(
-                youtube_video_id=data["video_id"],
-                video_url=data["video_url"],
-                title=data["title"],
-                description=data["description"],
-                fk_author_id=author.id,
-                total_threads=data["total_threads"],
-                updated_at=now
-            )
+            youtube_video_id=data["video_id"],
+            video_url=data["video_url"],
+            title=data["title"],
+            description=data["description"],
+            fk_author_id=author.id,
+            total_threads=data["total_threads"],
+            updated_at=now,
+            total_likes=data.get("total_likes"),
+            total_comments=data.get("total_comments"),
+            emoji_stats=data.get("emoji_stats"),
+            total_emojis=data.get("total_emojis"),
+            most_common_emojis=data.get("most_common_emojis")
+        )
+
             session.add(video)  # Agregar a sesión para que tenga ID
             session.flush()  # Para asegurar que video.id esté disponible
         except Exception as e:
@@ -74,7 +80,12 @@ def update_video(session, video, data, now):
             video.description = data["description"]
             video.fk_author_id = author.id
             video.total_threads = data["total_threads"]
-            video.updated_at = now  # O usa updated_at si tienes
+            video.updated_at = now
+            video.total_likes = data.get("total_likes")
+            video.total_comments = data.get("total_comments")
+            video.emoji_stats = data.get("emoji_stats")
+            video.total_emojis = data.get("total_emojis")
+            video.most_common_emojis = data.get("most_common_emojis")
         except Exception as e:
             raise Exception(f"Error updating video: {e}")
 

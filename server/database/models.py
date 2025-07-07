@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, Column, Float, Integer, DateTime, String, Text, ForeignKey, JSON, Boolean
+from sqlalchemy.dialects.postgresql import JSONB  # si aún no lo has hecho
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from datetime import datetime
@@ -16,6 +17,12 @@ class Video(Base):
     fk_author_id = Column(Integer, ForeignKey('authors.id'))
     total_threads = Column(Integer)
     updated_at = Column(DateTime, nullable=False)
+
+    total_likes = Column(Integer, nullable=True)
+    total_comments = Column(Integer, nullable=True)
+    emoji_stats = Column(JSONB, nullable=True)
+    total_emojis = Column(Integer, nullable=True)
+    most_common_emojis = Column(JSONB, nullable=True)
 
     threads = relationship("Thread", back_populates="video", cascade="all, delete-orphan")
     requests = relationship("Request", back_populates="video", cascade="all, delete-orphan")
