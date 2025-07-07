@@ -12,12 +12,13 @@ class Video(Base):
     video_url = Column(String, nullable=False)
     title = Column(String, nullable=False)
     description = Column(Text)
-    author = Column(String)
+    fk_author_id = Column(Integer, ForeignKey('authors.id'))
     total_threads = Column(Integer)
     updated_at = Column(DateTime, nullable=False)
 
     threads = relationship("Thread", back_populates="video", cascade="all, delete-orphan")
     requests = relationship("Request", back_populates="video", cascade="all, delete-orphan")
+    authors = relationship("Author", back_populates="videos")
 
 
 class Request(Base):
@@ -53,3 +54,4 @@ class Author(Base):
     name = Column(String, unique=True, nullable=False)
 
     threads = relationship("Thread", back_populates="author_obj", cascade="all, delete-orphan")
+    videos = relationship("Video", back_populates="authors", cascade="all, delete-orphan")
