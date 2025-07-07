@@ -1,7 +1,6 @@
-from sqlalchemy import create_engine, Column, Float, Integer, DateTime, String, Text, ForeignKey, JSON, Boolean
+from sqlalchemy import create_engine, Column, Float, Integer, DateTime, String, Text, ForeignKey, JSON, Boolean, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB  # si aún no lo has hecho
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship, declarative_base
 from datetime import datetime
 
 Base = declarative_base()
@@ -38,18 +37,18 @@ class Request(Base):
 
     video = relationship("Video", back_populates="requests")
     threads = relationship("Thread", back_populates="request", cascade="all, delete-orphan")
-
+    request_threads = relationship("RequestThread", back_populates="request", cascade="all, delete-orphan")
 
 class Thread(Base):
     __tablename__ = 'threads'
 
     id = Column(Integer, primary_key=True)
     fk_video_id = Column(Integer, ForeignKey('videos.id'), nullable=False)
-    fk_request_id = Column(Integer, ForeignKey('requests.id'), nullable=False)
     fk_author_id = Column(Integer, ForeignKey('authors.id'), nullable=True)
     parent_comment_id = Column(Integer, ForeignKey('threads.id'), nullable=True)
     comment = Column(Text)
-    inserted_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
 
     likes = Column(Integer, default=0)
     published_time = Column(String)
@@ -61,6 +60,19 @@ class Thread(Base):
     video = relationship("Video", back_populates="threads")
     request = relationship("Request", back_populates="threads")
     author_obj = relationship("Author", back_populates="threads")
+    request_threads = relationship("RequestThread", back_populates="thread", cascade="all, delete-orphan")
+
+class RequestThread(Base):
+    __tablename__ = "request_threads"
+
+    id = Column(Integer, primary_key=True)
+    fk_request_id = Column(Integer, ForeignKey("requests.id", ondelete="CASCADE"), nullable=False)
+    fk_thread_id = Column(Integer, ForeignKey("threads.id", ondelete="CASCADE"), nullable=False)
+
+    __table_args__ = (UniqueConstraint("fk_request_id", "fk_thread_id", name="uq_request_thread"),)
+
+    request = relationship("Request", back_populates="request_threads")
+    thread = relationship("Thread", back_populates="request_threads")
 
 class Author(Base):
     __tablename__ = 'authors'
@@ -70,7 +82,6 @@ class Author(Base):
 
     threads = relationship("Thread", back_populates="author_obj", cascade="all, delete-orphan")
     videos = relationship("Video", back_populates="authors", cascade="all, delete-orphan")
-
 
 
 class VideoToxicitySummary(Base):
@@ -107,3 +118,6 @@ class ToxicityAnalysis(Base):
 
     thread = relationship("Thread", backref="toxicity_analysis", uselist=False)
     request = relationship("Request", backref="toxicity_analysis")
+
+
+
