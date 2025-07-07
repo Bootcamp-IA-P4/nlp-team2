@@ -11,6 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import emoji
 from collections import Counter
 import json
+from server.core.print_dev import log_info, log_error, log_warning, log_debug
 
 class YouTubeCommentScraperChrome:
     def __init__(self, headless=True, progress_callback=None):
@@ -28,12 +29,10 @@ class YouTubeCommentScraperChrome:
         self.progress_callback = progress_callback
         
     def emit_progress(self, percentage, message):
-        """Envía actualización de progreso si hay callback configurado"""
-        if self.progress_callback:
+         if self.progress_callback:
             self.progress_callback(percentage, message)
     
     def setup_driver(self):
-        """Configura el driver de Chrome optimizado para Docker"""
         self.emit_progress(5, "🐳 Configurando Chrome para Docker...")
         chrome_options = Options()
         
@@ -73,7 +72,7 @@ class YouTubeCommentScraperChrome:
                 return
                 
             except Exception as e:
-                print(f"ChromeDriverManager falló: {e}")
+                log_error("❌ ChormeDriverManager falló: " + str(e))
             
             # Intentar con Chrome del sistema
             try:
@@ -86,7 +85,7 @@ class YouTubeCommentScraperChrome:
                 return
                 
             except Exception as e:
-                print(f"Chrome del sistema falló: {e}")
+                log_error("❌ Chrome del sistema falló: " + str(e))
             
             raise Exception("No se pudo configurar Chrome en Docker")
             
@@ -94,7 +93,7 @@ class YouTubeCommentScraperChrome:
             raise Exception(f"Error configurando Chrome en Docker: {e}")
     
     def extract_emojis(self, text):
-        """Extrae todos los emojis de un texto y los cuenta"""
+
         emojis_found = []
         for char in text:
             if char in emoji.EMOJI_DATA:
@@ -103,7 +102,7 @@ class YouTubeCommentScraperChrome:
         return emojis_found
     
     def scroll_to_load_comments(self, max_comments=100):
-        """Hace scroll hacia abajo para cargar más comentarios"""
+ 
         print(f"📜 Cargando comentarios... (máximo {max_comments})")
         
         # Scroll inicial hasta los comentarios
@@ -144,7 +143,7 @@ class YouTubeCommentScraperChrome:
                 break
     
     def extract_comment_data(self, comment_element):
-        """Extrae los datos de un comentario individual"""
+
         try:
             # Autor del comentario
             author_selectors = [
@@ -332,7 +331,7 @@ class YouTubeCommentScraperChrome:
             
             return {
                 'author': author,
-                'content': content,
+                'comment': content,
                 'likes': likes,
                 'published_time': published_time,
                 'emojis': emojis,
@@ -343,19 +342,12 @@ class YouTubeCommentScraperChrome:
             }
             
         except Exception as e:
-            print(f"❌ Error extrayendo comentario: {e}")
+            log_error("❌ Error extrayendo comentario: " + str(e))
+
             return None
     
     def extract_reply_data(self, reply_element):
-        """
-        Extrae los datos de una respuesta a un comentario
-        
-        Args:
-            reply_element: Elemento web de la respuesta
-            
-        Returns:
-            dict: Datos de la respuesta
-        """
+
         try:
             # Autor de la respuesta - selectores optimizados para Chrome
             author_selectors = [
@@ -433,14 +425,14 @@ class YouTubeCommentScraperChrome:
             
             return {
                 'author': author,
-                'content': content,
+                'comment': content,
                 'likes': likes,
                 'emojis': emojis,
                 'emoji_count': len(emojis)
             }
             
         except Exception as e:
-            print(f"❌ Error extrayendo respuesta: {e}")
+            log_error("❌ Error extrayendo respuesta: " + str(e))
             return None
     
     def scrape_video_comments(self, video_url, max_comments=50):
@@ -695,7 +687,7 @@ class YouTubeCommentScraperChrome:
             
         except Exception as e:
             self.emit_progress(-1, f"❌ Error durante el scraping: {e}")
-            print(f"❌ Error durante el scraping: {e}")
+            log_error("❌ Error durante el scraping: " + str(e))
             return None
         finally:
             if self.driver:
@@ -718,14 +710,15 @@ def scrape_youtube_comments(video_url, max_comments=1000):
     
     # Ejecutar scraping
     print(f"\n🚀 Iniciando scraping en Docker con Chrome...")
+    log_info(f"Iniciando {video_url} con {max_comments} comentarios")
     data = scraper.scrape_video_comments(video_url, max_comments)
     
     if data:
         print(json.dumps(data, ensure_ascii=False, indent=2))
         print(f"\n🎉 ¡Scraping completado exitosamente!")
         print(f"📊 Se extrajeron {data['total_comments']} comentarios y {data['total_threads']} respuestas")
-        
+        log_info(f"📊 Se extrajeron {data['total_comments']} comentarios y {data['total_threads']} respuestas")
     else:
-        print("❌ Error: No se pudieron extraer los datos")
+        log_error("❌ Error: No se pudieron extraer los datos")
         print("Por favor, verifica la URL del video y tu conexión a Internet.")
 
