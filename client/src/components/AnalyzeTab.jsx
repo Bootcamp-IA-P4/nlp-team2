@@ -186,17 +186,18 @@ const AnalyzeTab = () => {
                   
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
+                      {/* Estados de toxicidad con nuevos colores */}
                       {analysisResult.single_comment.is_toxic ? (
                         <div className="flex items-center space-x-2">
-                          <XCircle className="h-5 w-5 text-red-500" />
-                          <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 rounded-full text-sm font-medium">
+                          <XCircle className="h-5 w-5 text-wine-500" />
+                          <span className="px-3 py-1 toxicity-critical rounded-full text-sm font-medium">
                             Contenido Tóxico
                           </span>
                         </div>
                       ) : (
                         <div className="flex items-center space-x-2">
                           <CheckCircle className="h-5 w-5 text-green-500" />
-                          <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 rounded-full text-sm font-medium">
+                          <span className="px-3 py-1 toxicity-safe rounded-full text-sm font-medium">
                             Contenido Limpio
                           </span>
                         </div>
