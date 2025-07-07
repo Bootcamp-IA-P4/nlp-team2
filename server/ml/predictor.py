@@ -13,12 +13,15 @@ class ToxicityPredictor:
     def __init__(self, model_path: Optional[str] = None):
         self.logger = logging.getLogger(__name__)
         
-        # Configurar rutas
+        # Configurar rutas - CAMBIAR models por model
         if model_path is None:
-            model_path = os.path.join(os.path.dirname(__file__), "models", "distilbert_model.pkl")
+            model_path = os.path.join(os.path.dirname(__file__), "model", "distilbert_model.pkl")
         
         self.model_path = model_path
         self.metrics_path = os.path.join(os.path.dirname(model_path), "metrics.pkl")
+        
+        print(f"🔍 Buscando modelo en: {self.model_path}")
+        print(f"🔍 ¿Existe el archivo? {os.path.exists(self.model_path)}")
         
         # Cargar modelo
         self._load_model()

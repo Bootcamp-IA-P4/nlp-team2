@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import logging
-from ..ml.pipeline import ToxicityPipeline
+from ..pipeline import ToxicityPipeline
 
 # Configurar router
 router = APIRouter(prefix="/api/v1/toxicity", tags=["toxicity"])
@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 try:
     toxicity_pipeline = ToxicityPipeline()
     PIPELINE_AVAILABLE = True
+    logger.info("Pipeline de toxicidad inicializado correctamente")
 except Exception as e:
     logger.error(f"Error inicializando pipeline: {e}")
     PIPELINE_AVAILABLE = False
