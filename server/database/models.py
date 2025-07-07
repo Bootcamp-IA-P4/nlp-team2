@@ -44,12 +44,16 @@ class Thread(Base):
     comment = Column(Text)
     inserted_at = Column(DateTime, nullable=False)
 
+    likes = Column(Integer, default=0)
+    published_time = Column(String)
+    emoji_count = Column(Integer, default=0)
+    emojis = Column(JSON)
+    has_replies = Column(Boolean, default=False)
+    replies_count = Column(Integer, default=0)
+
     video = relationship("Video", back_populates="threads")
     request = relationship("Request", back_populates="threads")
     author_obj = relationship("Author", back_populates="threads")
-    
-    # Establishing a self-referential relationship for replies
-    parent = relationship("Thread", remote_side=[id], backref="replies")
 
 class Author(Base):
     __tablename__ = 'authors'
