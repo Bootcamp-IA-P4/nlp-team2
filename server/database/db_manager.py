@@ -38,13 +38,19 @@ def create_tables():
 
 def insert_new_video(session,data,now):
         try:
+            author_name = data["author"]
+            author = session.query(Author).filter_by(name=author_name).first()
+            if author is None:
+                author = Author(name=author_name)
+                session.add(author)
+                session.flush()
         # Crear nuevo video si no existe
             video = Video(
                 youtube_video_id=data["video_id"],
                 video_url=data["video_url"],
                 title=data["title"],
                 description=data["description"],
-                author=data["author"],
+                fk_author_id=author.id,
                 total_threads=data["total_threads"],
                 updated_at=now
             )
@@ -54,13 +60,19 @@ def insert_new_video(session,data,now):
             raise Exception(f"Error inserting new video: {e}")
         return video
 
-def update_video(video,data,now):
+def update_video(session, video, data, now):
+        author_name = data["author"]
+        author = session.query(Author).filter_by(name=author_name).first()
+        if author is None:
+            author = Author(name=author_name)
+            session.add(author)
+            session.flush()
         try:
             # Actualizar campos existentes
             video.video_url = data["video_url"]
             video.title = data["title"]
             video.description = data["description"]
-            video.author = data["author"]
+            video.fk_author_id = author.id
             video.total_threads = data["total_threads"]
             video.updated_at = now  # O usa updated_at si tienes
         except Exception as e:
@@ -78,7 +90,7 @@ def insert_video_from_scrapper(data):
         if video is None:
             video = insert_new_video(session, data, now)
         else:
-            update_video(video, data, now)
+            update_video(session, video, data, now)
     
         # Crear nueva Request vinculada al video
         request = Request(
