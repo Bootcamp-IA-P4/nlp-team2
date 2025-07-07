@@ -1,3 +1,4 @@
+# Python
 .venv
 venv
 __pycache__
@@ -7,7 +8,55 @@ __pycache__
 *.pkl
 *.db
 *.sqlite3
+
+# Environment
 .env
 .DS_Store
 .env*
 /.env
+*.json
+
+# Node
+npm-debug.log
+node_modules
+
+# MLflow y resultados
+*/mlruns/
+mlruns/
+**/mlruns/
+*/results_*/
+results_*/
+**/results_*/
+
+# Modelos entrenados
+*.pth
+*.pt
+*.h5
+*.hdf5
+*.safetensors
+mlFlow/models/
+
+
+# Logs y outputs
+logs/
+*.log
+outputs/
+checkpoints/
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Data (si son archivos grandes)
+# data/processed/
+# data/external/
+
+# Data files
+*.csv
+*.tsv
+*.json
+*.parquet
+*.pkl
+*.txt
+*.xml
+*.xlsx

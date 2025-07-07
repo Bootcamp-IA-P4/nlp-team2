@@ -1,0 +1,20 @@
+name: nlp-youtube-toxicity-analysis
+channels:
+  - defaults
+dependencies:
+  - python=3.8
+  - pandas
+  - numpy
+  - matplotlib
+  - seaborn
+  - plotly
+  - scikit-learn
+  - nltk
+  - emoji
+  - wordcloud
+  - mlflow
+  - jupyter
+  - pip
+  - pip:
+      - plotly-express
+      - ipykernel
