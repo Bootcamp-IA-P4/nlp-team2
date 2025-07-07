@@ -13,20 +13,28 @@ from collections import Counter
 import json
 
 class YouTubeCommentScraperChrome:
-    def __init__(self, headless=True):
+    def __init__(self, headless=True, progress_callback=None):
         """
         Inicializa el scraper de comentarios de YouTube para Docker con Chrome
         
         Args:
             headless (bool): Si True, ejecuta el navegador en modo sin interfaz gráfica
+            progress_callback (function): Función opcional para reportar progreso
         """
         self.driver = None
         self.headless = headless
         self.comments_data = []
         self.emoji_counter = Counter()
+        self.progress_callback = progress_callback
         
+    def emit_progress(self, percentage, message):
+        """Envía actualización de progreso si hay callback configurado"""
+        if self.progress_callback:
+            self.progress_callback(percentage, message)
+    
     def setup_driver(self):
         """Configura el driver de Chrome optimizado para Docker"""
+        self.emit_progress(5, "🐳 Configurando Chrome para Docker...")
         chrome_options = Options()
         
         # Configuraciones obligatorias para Docker
@@ -58,6 +66,7 @@ class YouTubeCommentScraperChrome:
                 service = Service(ChromeDriverManager().install())
                 self.driver = webdriver.Chrome(service=service, options=chrome_options)
                 print("✅ ChromeDriver automático configurado en Docker")
+                self.emit_progress(15, "✅ ChromeDriver automático configurado")
                 
                 # Configurar script para evitar detección
                 self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -70,6 +79,7 @@ class YouTubeCommentScraperChrome:
             try:
                 self.driver = webdriver.Chrome(options=chrome_options)
                 print("✅ Chrome del sistema configurado en Docker")
+                self.emit_progress(15, "✅ Chrome del sistema configurado")
                 
                 # Configurar script para evitar detección
                 self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -115,6 +125,8 @@ class YouTubeCommentScraperChrome:
             
             if current_comments > comments_loaded:
                 comments_loaded = current_comments
+                progress = 60 + (10 * min(comments_loaded / max_comments, 1))
+                self.emit_progress(int(progress), f"📝 Comentarios cargados: {comments_loaded}")
                 print(f"📝 Comentarios cargados: {comments_loaded}")
                 scroll_attempts = 0  # Reset attempts if we found new comments
             else:
@@ -123,6 +135,7 @@ class YouTubeCommentScraperChrome:
             # Verificar si la página sigue creciendo
             new_height = self.driver.execute_script("return document.documentElement.scrollHeight")
             if new_height == last_height and comments_loaded >= 10:
+                self.emit_progress(70, f"🔚 Carga completada con {comments_loaded} comentarios")
                 print(f"🔚 Altura de página estabilizada en {comments_loaded} comentarios")
                 break
             last_height = new_height
@@ -433,16 +446,20 @@ class YouTubeCommentScraperChrome:
     def scrape_video_comments(self, video_url, max_comments=50):
         """Scrape los comentarios de un video de YouTube"""
         try:
+            self.emit_progress(10, "🚀 Iniciando proceso de scraping...")
             self.setup_driver()
+            self.emit_progress(20, f"🌐 Accediendo a: {video_url}")
             print(f"🌐 Accediendo a: {video_url}")
             
             # Cargar la página del video
             self.driver.get(video_url)
+            self.emit_progress(25, "📖 Página cargada, extrayendo metadatos...")
             
             # Esperar a que la página cargue
             wait = WebDriverWait(self.driver, 30)
             
             # Obtener título del video
+            self.emit_progress(30, "🎬 Extrayendo título del video...")
             video_title = "Título no disponible"
             title_selectors = [
                 "h1.ytd-watch-metadata",
@@ -460,6 +477,7 @@ class YouTubeCommentScraperChrome:
                 except:
                     continue
             
+            self.emit_progress(35, f"✅ Título encontrado: {video_title[:50]}...")
             print(f"🎬 Video: {video_title}")
             
             # Extraer ID del video de la URL
@@ -473,6 +491,7 @@ class YouTubeCommentScraperChrome:
                 pass
             
             # Obtener autor del video
+            self.emit_progress(40, "👤 Extrayendo información del autor...")
             video_author = "Autor no disponible"
             author_selectors = [
                 "ytd-channel-name #text",
@@ -494,10 +513,12 @@ class YouTubeCommentScraperChrome:
                 except:
                     continue
             
+            self.emit_progress(45, f"✅ Autor encontrado: {video_author}")
             print(f"🆔 Video ID: {video_id}")
             print(f"👤 Autor: {video_author}")
             
             # Obtener descripción del video
+            self.emit_progress(50, "📝 Extrayendo descripción del video...")
             video_description = "Descripción no disponible"
             
             # Scroll hacia la sección de descripción y esperar más tiempo
@@ -608,13 +629,18 @@ class YouTubeCommentScraperChrome:
                 except:
                     pass
             
+            self.emit_progress(55, f"✅ Descripción extraída: {len(video_description)} caracteres")
             print(f"📝 Descripción extraída: {len(video_description)} caracteres")
             
             # Cargar comentarios
+            self.emit_progress(60, f"📜 Cargando comentarios (máximo {max_comments})...")
             self.scroll_to_load_comments(max_comments)
             
             # Extraer comentarios
+            self.emit_progress(75, "🔍 Procesando comentarios extraídos...")
             comment_elements = self.driver.find_elements(By.CSS_SELECTOR, "ytd-comment-thread-renderer")
+            total_elements = min(len(comment_elements), max_comments)
+            self.emit_progress(80, f"📝 Encontrados {len(comment_elements)} comentarios, procesando {total_elements}...")
             print(f"🔍 Procesando {len(comment_elements)} comentarios...")
             
             for i, comment_element in enumerate(comment_elements[:max_comments]):
@@ -624,8 +650,14 @@ class YouTubeCommentScraperChrome:
                     
                 if (i + 1) % 3 == 0:
                     print(f"✅ Procesados {i + 1} comentarios...")
+                
+                # Actualizar progreso cada 5 comentarios para la web
+                if (i + 1) % 5 == 0 or i == total_elements - 1:
+                    progress = 80 + (15 * (i + 1) / total_elements)
+                    self.emit_progress(int(progress), f"✅ Procesados {i + 1}/{total_elements} comentarios...")
             
             # Estadísticas
+            self.emit_progress(95, "📊 Calculando estadísticas finales...")
             total_comments = len(self.comments_data)
             total_replies = sum(len(comment['replies']) for comment in self.comments_data)
             total_emojis = sum(comment['emoji_count'] for comment in self.comments_data)
@@ -657,9 +689,12 @@ class YouTubeCommentScraperChrome:
                 'threads': self.comments_data
             }
             
+            self.emit_progress(100, f"🎉 ¡Scraping completado! {total_comments} comentarios y {total_replies} respuestas extraídas")
+            
             return results
             
         except Exception as e:
+            self.emit_progress(-1, f"❌ Error durante el scraping: {e}")
             print(f"❌ Error durante el scraping: {e}")
             return None
         finally:
