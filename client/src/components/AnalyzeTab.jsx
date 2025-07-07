@@ -1,37 +1,94 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Play, AlertTriangle, MessageCircle, TrendingUp, Clock, Send, Video, CheckCircle, XCircle } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { Play, AlertTriangle, MessageCircle, TrendingUp, Clock, Send, Video, CheckCircle, XCircle, BarChart3, Settings } from 'lucide-react';
+import ProgressLoader from './ProgressLoader';
 
 const AnalyzeTab = () => {
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [comment, setComment] = useState('');
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
   const [error, setError] = useState('');
+  
+  // ✅ NUEVOS ESTADOS para número de comentarios
+  const [maxComments, setMaxComments] = useState(50);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // Analizar video de YouTube
+  // Constantes de validación basadas en tu scraper
+  const MIN_COMMENTS = 5;
+  const MAX_COMMENTS = 1000; // Basado en tu scraper
+  const RECOMMENDED_COMMENTS = [10, 25, 50, 100, 200, 500];
+
+  // Validar número de comentarios
+  const validateCommentsNumber = (value) => {
+    const num = parseInt(value);
+    if (isNaN(num)) return false;
+    if (num < MIN_COMMENTS) return false;
+    if (num > MAX_COMMENTS) return false;
+    return true;
+  };
+
+  // Manejar cambio en número de comentarios
+  const handleMaxCommentsChange = (value) => {
+    const num = parseInt(value);
+    if (!isNaN(num)) {
+      setMaxComments(Math.min(Math.max(num, MIN_COMMENTS), MAX_COMMENTS));
+    }
+  };
+
+  // Analizar video de YouTube (ACTUALIZADO)
   const handleAnalyzeVideo = async () => {
     if (!youtubeUrl.trim()) {
       setError('Por favor ingresa una URL válida');
       return;
     }
 
+    if (!validateCommentsNumber(maxComments)) {
+      setError(`El número de comentarios debe estar entre ${MIN_COMMENTS} y ${MAX_COMMENTS}`);
+      return;
+    }
+
     setIsAnalyzing(true);
     setError('');
     setAnalysisResult(null);
+    setSessionId(null);
 
     try {
+      // ✅ INCLUIR maxComments en la petición
       const response = await axios.post('http://localhost:8000/v1/analyze_video_with_ml', {
-        url: youtubeUrl
+        url: youtubeUrl,
+        max_comments: maxComments
       });
 
-      setAnalysisResult(response.data);
+      if (response.data.success && response.data.session_id) {
+        setSessionId(response.data.session_id);
+        console.log('🎯 Análisis iniciado con session_id:', response.data.session_id);
+        console.log('📊 Máximo comentarios:', maxComments);
+      } else {
+        throw new Error('No se pudo iniciar el análisis');
+      }
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error analizando el video');
-    } finally {
+      console.error('❌ Error iniciando análisis:', err);
+      setError(err.response?.data?.detail || 'Error iniciando el análisis');
       setIsAnalyzing(false);
     }
+  };
+
+  // Manejar finalización del análisis
+  const handleAnalysisComplete = (data) => {
+    console.log('🎉 Análisis completado:', data);
+    setAnalysisResult(data);
+    setIsAnalyzing(false);
+    setSessionId(null);
+  };
+
+  // Manejar error del análisis
+  const handleAnalysisError = (errorMessage) => {
+    console.error('❌ Error en análisis:', errorMessage);
+    setError(errorMessage);
+    setIsAnalyzing(false);
+    setSessionId(null);
   };
 
   // Analizar comentario individual
@@ -66,7 +123,7 @@ const AnalyzeTab = () => {
       <div className="card">
         <div className="flex items-center space-x-4 mb-6">
           <div className="p-3 bg-accent-100 dark:bg-accent-900/30 rounded-lg">
-            <BarChart className="h-8 w-8 text-accent-600 dark:text-accent-400" />
+            <BarChart3 className="h-8 w-8 text-accent-600 dark:text-accent-400" />
           </div>
           <div>
             <h2 className="page-title">Análisis de Toxicidad con IA</h2>
@@ -75,7 +132,7 @@ const AnalyzeTab = () => {
         </div>
       </div>
 
-      {/* Análisis de Video YouTube */}
+      {/* Análisis de Video YouTube - ACTUALIZADO */}
       <div className="card">
         <div className="flex items-center space-x-3 mb-4">
           <Video className="h-6 w-6 text-secondary-500 dark:text-secondary-400" />
@@ -83,27 +140,57 @@ const AnalyzeTab = () => {
         </div>
         
         <div className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
-            <input
-              type="text"
-              value={youtubeUrl}
-              onChange={(e) => setYoutubeUrl(e.target.value)}
-              placeholder="https://www.youtube.com/watch?v=..."
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
-                         bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                         focus:ring-2 focus:ring-accent-500 focus:border-transparent 
-                         placeholder-gray-500 dark:placeholder-gray-400"
-              disabled={isAnalyzing}
-            />
+          {/* Input URL */}
+          <div className="flex flex-col md:flex-row md:items-end space-y-4 md:space-y-0 md:space-x-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-navy-700 dark:text-cream-300 mb-2">
+                URL del Video
+              </label>
+              <input
+                type="text"
+                value={youtubeUrl}
+                onChange={(e) => setYoutubeUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="input-primary w-full"
+                disabled={isAnalyzing}
+              />
+            </div>
+            
+            {/* ✅ NUEVO: Selector de número de comentarios */}
+            <div className="md:w-48">
+              <label className="block text-sm font-medium text-navy-700 dark:text-cream-300 mb-2">
+                Comentarios a analizar
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  value={maxComments}
+                  onChange={(e) => handleMaxCommentsChange(e.target.value)}
+                  min={MIN_COMMENTS}
+                  max={MAX_COMMENTS}
+                  className="input-primary w-20 text-center"
+                  disabled={isAnalyzing}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="p-2 text-navy-500 hover:text-navy-700 dark:text-cream-300 dark:hover:text-cream-100 hover:bg-cream-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  disabled={isAnalyzing}
+                >
+                  <Settings className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
             <button
               onClick={handleAnalyzeVideo}
-              disabled={isAnalyzing || !youtubeUrl.trim()}
-              className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isAnalyzing || !youtubeUrl.trim() || !validateCommentsNumber(maxComments)}
+              className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
             >
               {isAnalyzing ? (
                 <>
                   <Clock className="h-4 w-4 animate-spin" />
-                  <span>Analizando...</span>
+                  <span>Iniciando...</span>
                 </>
               ) : (
                 <>
@@ -113,8 +200,104 @@ const AnalyzeTab = () => {
               )}
             </button>
           </div>
+
+          {/* ✅ NUEVO: Panel de configuración avanzada */}
+          {showAdvanced && (
+            <div className="p-4 bg-cream-50 dark:bg-gray-700/50 rounded-lg border border-cream-200 dark:border-gray-600">
+              <div className="flex items-center space-x-2 mb-3">
+                <Settings className="h-4 w-4 text-navy-600 dark:text-cream-400" />
+                <h4 className="text-sm font-medium text-navy-700 dark:text-cream-300">Configuración Avanzada</h4>
+              </div>
+              
+              {/* Botones rápidos */}
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-navy-600 dark:text-cream-400 mb-2">Presets recomendados:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {RECOMMENDED_COMMENTS.map((preset) => (
+                      <button
+                        key={preset}
+                        onClick={() => setMaxComments(preset)}
+                        disabled={isAnalyzing}
+                        className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                          maxComments === preset
+                            ? 'bg-accent-500 text-white'
+                            : 'bg-cream-200 dark:bg-gray-600 text-navy-700 dark:text-cream-300 hover:bg-cream-300 dark:hover:bg-gray-500'
+                        }`}
+                      >
+                        {preset}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Información y validación */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                  <div className="p-2 bg-white dark:bg-gray-800 rounded border">
+                    <p className="text-navy-500 dark:text-cream-500">Mínimo:</p>
+                    <p className="font-medium text-navy-800 dark:text-cream-200">{MIN_COMMENTS} comentarios</p>
+                  </div>
+                  <div className="p-2 bg-white dark:bg-gray-800 rounded border">
+                    <p className="text-navy-500 dark:text-cream-500">Máximo:</p>
+                    <p className="font-medium text-navy-800 dark:text-cream-200">{MAX_COMMENTS} comentarios</p>
+                  </div>
+                  <div className="p-2 bg-white dark:bg-gray-800 rounded border">
+                    <p className="text-navy-500 dark:text-cream-500">Tiempo estimado:</p>
+                    <p className="font-medium text-navy-800 dark:text-cream-200">
+                      {maxComments <= 50 ? '1-2 min' : 
+                       maxComments <= 200 ? '2-4 min' : 
+                       maxComments <= 500 ? '4-7 min' : '7-12 min'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Indicador de validación */}
+                <div className="flex items-center space-x-2">
+                  {validateCommentsNumber(maxComments) ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-xs text-green-600 dark:text-green-400">
+                        Configuración válida
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-4 w-4 text-red-500" />
+                      <span className="text-xs text-red-600 dark:text-red-400">
+                        Número debe estar entre {MIN_COMMENTS} y {MAX_COMMENTS}
+                      </span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Información básica siempre visible */}
+          <div className="flex items-center justify-between text-xs text-navy-600 dark:text-cream-400">
+            <span>
+              📊 Se analizarán hasta <strong>{maxComments}</strong> comentarios
+            </span>
+            <span>
+              ⏱️ Tiempo estimado: <strong>
+                {maxComments <= 50 ? '1-2 minutos' : 
+                 maxComments <= 200 ? '2-4 minutos' : 
+                 maxComments <= 500 ? '4-7 minutos' : '7-12 minutos'}
+              </strong>
+            </span>
+          </div>
         </div>
       </div>
+
+      {/* ✅ MOSTRAR loader con progreso (actualizado con número de comentarios) */}
+      {isAnalyzing && sessionId && (
+        <ProgressLoader 
+          sessionId={sessionId}
+          onComplete={handleAnalysisComplete}
+          onError={handleAnalysisError}
+          maxComments={maxComments} // Pasar el número para mostrar en el loader
+        />
+      )}
 
       {/* Análisis de Comentario Individual */}
       <div className="card">
