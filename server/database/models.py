@@ -1,6 +1,7 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, ForeignKey, DateTime
+from sqlalchemy import create_engine, Column, Float, Integer, DateTime, String, Text, ForeignKey, JSON, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -58,3 +59,40 @@ class Author(Base):
 
     threads = relationship("Thread", back_populates="author_obj", cascade="all, delete-orphan")
     videos = relationship("Video", back_populates="authors", cascade="all, delete-orphan")
+
+
+
+class VideoToxicitySummary(Base):
+    __tablename__ = "video_toxicity_summary"
+
+    id = Column(Integer, primary_key=True)
+    fk_video_id = Column(Integer, ForeignKey("videos.id", ondelete="CASCADE"))
+    fk_request_id = Column(Integer, ForeignKey("requests.id", ondelete="CASCADE"))
+    total_comments = Column(Integer, nullable=False)
+    toxic_comments = Column(Integer, nullable=False)
+    toxicity_rate = Column(Float(5, 4), nullable=False)
+    categories_summary = Column(JSON)
+    most_toxic_thread_id = Column(Integer, ForeignKey("threads.id"))
+    average_toxicity = Column(Float(5, 4))
+    model_info = Column(JSON)
+    analysis_completed_at = Column(DateTime, default=datetime.utcnow)
+
+    video = relationship("Video", backref="toxicity_summary")
+    request = relationship("Request", backref="toxicity_summary")
+    most_toxic_thread = relationship("Thread", foreign_keys=[most_toxic_thread_id])
+
+class ToxicityAnalysis(Base):
+    __tablename__ = "toxicity_analysis"
+
+    id = Column(Integer, primary_key=True)
+    fk_thread_id = Column(Integer, ForeignKey("threads.id", ondelete="CASCADE"))
+    fk_request_id = Column(Integer, ForeignKey("requests.id", ondelete="CASCADE"))
+    is_toxic = Column(Boolean, nullable=False)
+    toxicity_confidence = Column(Float(5, 4), nullable=False)
+    categories_detected = Column(JSON)
+    category_scores = Column(JSON)
+    model_version = Column(String(20), default="1.0.0")
+    analyzed_at = Column(DateTime, default=datetime.utcnow)
+
+    thread = relationship("Thread", backref="toxicity_analysis", uselist=False)
+    request = relationship("Request", backref="toxicity_analysis")
