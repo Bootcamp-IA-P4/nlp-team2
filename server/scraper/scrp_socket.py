@@ -13,6 +13,7 @@ from collections import Counter
 import json
 from server.core.print_dev import log_info, log_error, log_warning, log_debug
 import asyncio
+import threading
 from server.scraper.progress_manager import progress_manager
 
 class YouTubeCommentScraperChrome:
@@ -32,23 +33,38 @@ class YouTubeCommentScraperChrome:
         self.progress_callback = progress_callback
         self.session_id = session_id
         
-    async def emit_progress(self, percentage, message):
-        """Emitir progreso tanto por callback como por WebSocket"""
+    def emit_progress(self, percentage, message):
+        """Emitir progreso tanto por callback como por WebSocket (VERSIÓN SÍNCRONA)"""
         print(f"📊 [{percentage}%] {message}")  # Log en consola
         
         # Callback original
         if self.progress_callback:
             self.progress_callback(percentage, message)
         
-        # WebSocket para frontend
+        # WebSocket para frontend (ejecutado en hilo separado para no bloquear)
         if self.session_id:
             try:
-                await progress_manager.send_progress(self.session_id, percentage, message)
+                # Ejecutar en un hilo separado para mantener sincronía
+                def send_to_websocket():
+                    try:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        loop.run_until_complete(
+                            progress_manager.send_progress(self.session_id, percentage, message)
+                        )
+                        loop.close()
+                    except Exception as e:
+                        print(f"⚠️ Error enviando progreso por WebSocket: {e}")
+                
+                thread = threading.Thread(target=send_to_websocket, daemon=True)
+                thread.start()
+                
             except Exception as e:
-                print(f"⚠️ Error enviando progreso por WebSocket: {e}")
+                print(f"⚠️ Error configurando WebSocket: {e}")
     
-    async def setup_driver(self):
-        await self.emit_progress(5, "🐳 Configurando Chrome para Docker...")
+    def setup_driver(self):
+        """Configurar Chrome Driver (VERSIÓN SÍNCRONA)"""
+        self.emit_progress(5, "🐳 Configurando Chrome para Docker...")
         chrome_options = Options()
         
         # Configuraciones obligatorias para Docker
@@ -77,10 +93,11 @@ class YouTubeCommentScraperChrome:
             
             # Intentar primero con ChromeDriverManager
             try:
+                self.emit_progress(10, "🔧 Instalando ChromeDriver automático...")
                 service = Service(ChromeDriverManager().install())
                 self.driver = webdriver.Chrome(service=service, options=chrome_options)
                 print("✅ ChromeDriver automático configurado en Docker")
-                await self.emit_progress(15, "✅ ChromeDriver automático configurado")
+                self.emit_progress(15, "✅ ChromeDriver automático configurado")
                 
                 # Configurar script para evitar detección
                 self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -93,7 +110,7 @@ class YouTubeCommentScraperChrome:
             try:
                 self.driver = webdriver.Chrome(options=chrome_options)
                 print("✅ Chrome del sistema configurado en Docker")
-                await self.emit_progress(15, "✅ Chrome del sistema configurado")
+                self.emit_progress(15, "✅ Chrome del sistema configurado")
                 
                 # Configurar script para evitar detección
                 self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
@@ -116,7 +133,9 @@ class YouTubeCommentScraperChrome:
                 self.emoji_counter[char] += 1
         return emojis_found
     
-    async def scroll_to_load_comments(self, max_comments=100):
+    def scroll_to_load_comments(self, max_comments=100):
+        """Cargar comentarios con scroll (VERSIÓN SÍNCRONA)"""
+        self.emit_progress(20, f"📜 Cargando comentarios... (máximo {max_comments})")
         print(f"📜 Cargando comentarios... (máximo {max_comments})")
         
         # ✅ SCROLL MÁS AGRESIVO Y DEBUG
@@ -268,7 +287,7 @@ class YouTubeCommentScraperChrome:
             if current_comments > comments_loaded:
                 comments_loaded = current_comments
                 progress = 60 + (10 * min(comments_loaded / max_comments, 1))
-                await self.emit_progress(int(progress), f"📝 Comentarios cargados: {comments_loaded}")
+                self.emit_progress(int(progress), f"📝 Comentarios cargados: {comments_loaded}")
                 print(f"📝 Comentarios cargados: {comments_loaded}")
                 scroll_attempts = 0
             else:
@@ -278,7 +297,7 @@ class YouTubeCommentScraperChrome:
             # Verificar si la página sigue creciendo
             new_height = self.driver.execute_script("return document.documentElement.scrollHeight")
             if new_height == last_height and comments_loaded >= 1:
-                await self.emit_progress(70, f"🔚 Carga completada con {comments_loaded} comentarios")
+                self.emit_progress(70, f"🔚 Carga completada con {comments_loaded} comentarios")
                 print(f"🔚 Altura de página estabilizada en {comments_loaded} comentarios")
                 break
             last_height = new_height
@@ -580,23 +599,25 @@ class YouTubeCommentScraperChrome:
             log_error("❌ Error extrayendo respuesta: " + str(e))
             return None
     
-    async def scrape_video_comments(self, video_url, max_comments=50):
-        """Scrape los comentarios de un video de YouTube"""
+    def scrape_video_comments(self, video_url, max_comments=50):
+        """Scrape los comentarios de un video de YouTube (VERSIÓN SÍNCRONA CON WEBSOCKET)"""
+        self.emit_progress(0, "🚀 Iniciando análisis de YouTube...")
+        
         try:
-            await self.emit_progress(10, "🚀 Iniciando proceso de scraping...")
-            await self.setup_driver()
-            await self.emit_progress(20, f"🌐 Accediendo a: {video_url}")
+            self.emit_progress(10, "🚀 Iniciando proceso de scraping...")
+            self.setup_driver()
+            self.emit_progress(20, f"🌐 Accediendo a: {video_url}")
             print(f"🌐 Accediendo a: {video_url}")
             
             # Cargar la página del video
             self.driver.get(video_url)
-            await self.emit_progress(25, "📖 Página cargada, extrayendo metadatos...")
+            self.emit_progress(25, "📖 Página cargada, extrayendo metadatos...")
             
             # Esperar a que la página cargue
             wait = WebDriverWait(self.driver, 30)
             
             # Obtener título del video
-            await self.emit_progress(30, "🎬 Extrayendo título del video...")
+            self.emit_progress(30, "🎬 Extrayendo título del video...")
             video_title = "Título no disponible"
             title_selectors = [
                 "h1.ytd-watch-metadata",
@@ -614,7 +635,7 @@ class YouTubeCommentScraperChrome:
                 except:
                     continue
             
-            await self.emit_progress(35, f"✅ Título encontrado: {video_title[:50]}...")
+            self.emit_progress(35, f"✅ Título encontrado: {video_title[:50]}...")
             print(f"🎬 Video: {video_title}")
             
             # Extraer ID del video de la URL
@@ -628,7 +649,7 @@ class YouTubeCommentScraperChrome:
                 pass
             
             # Obtener autor del video
-            await self.emit_progress(40, "👤 Extrayendo información del autor...")
+            self.emit_progress(40, "👤 Extrayendo información del autor...")
             video_author = "Autor no disponible"
             author_selectors = [
                 "ytd-channel-name #text",
@@ -650,12 +671,12 @@ class YouTubeCommentScraperChrome:
                 except:
                     continue
             
-            await self.emit_progress(45, f"✅ Autor encontrado: {video_author}")
+            self.emit_progress(45, f"✅ Autor encontrado: {video_author}")
             print(f"🆔 Video ID: {video_id}")
             print(f"👤 Autor: {video_author}")
             
             # Obtener descripción del video
-            await self.emit_progress(50, "📝 Extrayendo descripción del video...")
+            self.emit_progress(50, "📝 Extrayendo descripción del video...")
             video_description = "Descripción no disponible"
             
             # Scroll hacia la sección de descripción y esperar más tiempo
@@ -766,18 +787,18 @@ class YouTubeCommentScraperChrome:
                 except:
                     pass
             
-            await self.emit_progress(55, f"✅ Descripción extraída: {len(video_description)} caracteres")
+            self.emit_progress(55, f"✅ Descripción extraída: {len(video_description)} caracteres")
             print(f"📝 Descripción extraída: {len(video_description)} caracteres")
             
             # Cargar comentarios
-            await self.emit_progress(60, f"📜 Cargando comentarios (máximo {max_comments})...")
-            await self.scroll_to_load_comments(max_comments)
+            self.emit_progress(60, f"📜 Cargando comentarios (máximo {max_comments})...")
+            self.scroll_to_load_comments(max_comments)
             
             # Extraer comentarios
-            await self.emit_progress(75, "🔍 Procesando comentarios extraídos...")
+            self.emit_progress(75, "🔍 Procesando comentarios extraídos...")
             comment_elements = self.driver.find_elements(By.CSS_SELECTOR, "ytd-comment-thread-renderer")
             total_elements = min(len(comment_elements), max_comments)
-            await self.emit_progress(80, f"📝 Encontrados {len(comment_elements)} comentarios, procesando {total_elements}...")
+            self.emit_progress(80, f"📝 Encontrados {len(comment_elements)} comentarios, procesando {total_elements}...")
             print(f"🔍 Procesando {len(comment_elements)} comentarios...")
             
             for i, comment_element in enumerate(comment_elements[:max_comments]):
@@ -791,10 +812,10 @@ class YouTubeCommentScraperChrome:
                 # Actualizar progreso cada 5 comentarios para la web
                 if (i + 1) % 5 == 0 or i == total_elements - 1:
                     progress = 80 + (15 * (i + 1) / total_elements)
-                    await self.emit_progress(int(progress), f"✅ Procesados {i + 1}/{total_elements} comentarios...")
+                    self.emit_progress(int(progress), f"✅ Procesados {i + 1}/{total_elements} comentarios...")
             
             # Estadísticas
-            await self.emit_progress(95, "📊 Calculando estadísticas finales...")
+            self.emit_progress(95, "📊 Calculando estadísticas finales...")
             total_comments = len(self.comments_data)
             total_replies = sum(len(comment['replies']) for comment in self.comments_data)
             total_emojis = sum(comment['emoji_count'] for comment in self.comments_data)
@@ -826,29 +847,95 @@ class YouTubeCommentScraperChrome:
                 'threads': self.comments_data
             }
             
-            await self.emit_progress(100, f"🎉 ¡Scraping completado! {total_comments} comentarios y {total_replies} respuestas extraídas")
+            self.emit_progress(100, f"🎉 ¡Scraping completado! {total_comments} comentarios y {total_replies} respuestas extraídas")
             
-            # Notificar finalización exitosa
-            if self.session_id:
-                await progress_manager.send_completion(self.session_id, True, results)
+            # ✅ NO ENVIAR completion desde el scraper - solo retornar los datos
+            # El análisis de toxicidad y completion se maneja en main.py
             
             return results
             
         except Exception as e:
-            await self.emit_progress(-1, f"❌ Error durante el scraping: {e}")
+            self.emit_progress(-1, f"❌ Error durante el scraping: {e}")
             
-            # Notificar error
+            # Solo enviar error del scraping, no completion final
             if self.session_id:
-                await progress_manager.send_completion(self.session_id, False, error=str(e))
+                try:
+                    def send_error():
+                        try:
+                            loop = asyncio.new_event_loop()
+                            asyncio.set_event_loop(loop)
+                            loop.run_until_complete(
+                                progress_manager.send_progress(self.session_id, -1, f"❌ Error en scraping: {e}")
+                            )
+                            loop.close()
+                        except Exception as ex:
+                            print(f"⚠️ Error enviando error: {ex}")
+                    
+                    thread = threading.Thread(target=send_error, daemon=True)
+                    thread.start()
+                except Exception as ex:
+                    print(f"⚠️ Error configurando error: {ex}")
             
             return None
+        finally:
+            if self.driver:
+                self.driver.quit()
 
-# Función wrapper async
+# Función wrapper síncrona para compatibilidad con main.py
+def scrape_youtube_comments_with_progress(video_url, max_comments=50, session_id=None):
+    """Función wrapper síncrona para scraping con progreso por WebSocket"""
+    try:
+        print(f"🎯 Iniciando scraping síncrono: {video_url} (max: {max_comments})")
+        print(f"📡 Session ID: {session_id}")
+        
+        # Crear scraper con WebSocket
+        scraper = YouTubeCommentScraperChrome(
+            headless=True,
+            session_id=session_id
+        )
+        
+        # Ejecutar scraping
+        data = scraper.scrape_video_comments(video_url, max_comments)
+        
+        print(f"✅ Scraping completado: {data.get('total_comments', 0) if data else 0} comentarios")
+        return data
+        
+    except Exception as e:
+        print(f"❌ Error en scraping con progreso: {e}")
+        # Enviar error por WebSocket si es posible
+        if session_id:
+            import threading
+            import asyncio
+            from .progress_manager import progress_manager
+            
+            def send_error():
+                try:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    loop.run_until_complete(
+                        progress_manager.send_completion(session_id, False, error=str(e))
+                    )
+                    loop.close()
+                except:
+                    pass
+            
+            threading.Thread(target=send_error, daemon=True).start()
+        
+        raise Exception(f"Error en scraping: {e}")
+
+# Función wrapper async (mantener para compatibilidad)
 async def scrape_youtube_comments_async(video_url, max_comments=50, session_id=None):
     """Función principal async para scraping con progreso"""
     try:
-        scraper = YouTubeCommentScraperChrome(headless=True, session_id=session_id)
-        return await scraper.scrape_video_comments(video_url, max_comments)
+        # Ejecutar la versión síncrona en un executor
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None,
+            scrape_youtube_comments_with_progress,
+            video_url,
+            max_comments,
+            session_id
+        )
     except Exception as e:
         print(f"❌ Error en scrape_youtube_comments_async: {e}")
         import traceback

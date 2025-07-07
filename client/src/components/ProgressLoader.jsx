@@ -1,43 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 
-const ProgressLoader = ({ sessionId, onComplete, onError, maxComments = 50 }) => {
+const ProgressLoader = ({ sessionId, onComplete, onError, maxComments }) => {
   const [progress, setProgress] = useState(0);
-  const [message, setMessage] = useState('Iniciando análisis...');
+  const [message, setMessage] = useState('Conectando...');
   const [status, setStatus] = useState('connecting');
-  const [ws, setWs] = useState(null);
+  const [websocket, setWebsocket] = useState(null);
+  const [hasConnected, setHasConnected] = useState(false);
 
   useEffect(() => {
     if (!sessionId) return;
 
-    // Conectar WebSocket
-    const websocket = new WebSocket(`ws://localhost:8000/ws/${sessionId}`);
+    console.log('🎯 Iniciando WebSocket para session:', sessionId);
     
-    websocket.onopen = () => {
-      console.log('🔌 WebSocket conectado');
+    const ws = new WebSocket(`ws://localhost:8000/ws/${sessionId}`);
+    setWebsocket(ws);
+
+    ws.onopen = () => {
+      console.log('✅ WebSocket conectado exitosamente');
       setStatus('connected');
       setMessage('Conectado al servidor...');
+      setHasConnected(true);
     };
 
-    websocket.onmessage = (event) => {
+    ws.onmessage = (event) => {
+      console.log('📨 RAW MESSAGE:', event.data);
       try {
         const data = JSON.parse(event.data);
-        console.log('📡 Mensaje recibido:', data);
-
+        console.log('📋 PARSED MESSAGE:', data);
+        
         if (data.type === 'progress') {
           setProgress(data.percentage);
           setMessage(data.message);
           setStatus('processing');
-        } else if (data.type === 'completion') {
+          console.log(`📊 Progreso actualizado: ${data.percentage}% - ${data.message}`);
+        } 
+        else if (data.type === 'completion') {
+          setStatus('completed');
           if (data.success) {
             setProgress(100);
-            setMessage('¡Análisis completado exitosamente!');
-            setStatus('completed');
-            onComplete && onComplete(data.data);
+            setMessage('Análisis completado exitosamente');
+            setTimeout(() => {
+              onComplete(data.data);
+            }, 1000);
           } else {
             setStatus('error');
             setMessage(`Error: ${data.error}`);
-            onError && onError(data.error);
+            onError(data.error);
           }
         }
       } catch (error) {
@@ -45,171 +54,179 @@ const ProgressLoader = ({ sessionId, onComplete, onError, maxComments = 50 }) =>
       }
     };
 
-    websocket.onclose = () => {
-      console.log('🔌 WebSocket desconectado');
-      if (status === 'processing') {
-        setStatus('disconnected');
-        setMessage('Conexión perdida');
-      }
-    };
-
-    websocket.onerror = (error) => {
-      console.error('❌ Error WebSocket:', error);
+    ws.onerror = (error) => {
+      console.error('❌ WebSocket error:', error);
       setStatus('error');
       setMessage('Error de conexión');
+      onError('Error de conexión WebSocket');
     };
 
-    setWs(websocket);
-
-    // Cleanup
-    return () => {
-      if (websocket.readyState === WebSocket.OPEN) {
-        websocket.close();
+    ws.onclose = (event) => {
+      console.log('🔌 WebSocket cerrado:', event.code, event.reason);
+      if (!hasConnected) {
+        setStatus('error');
+        setMessage('No se pudo conectar al servidor');
+        onError('No se pudo conectar al servidor');
       }
     };
-  }, [sessionId]);
+
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+    };
+  }, [sessionId, onComplete, onError, hasConnected]);
+
+  const getProgressBarColor = () => {
+    if (status === 'error') return 'bg-red-500';
+    if (status === 'completed') return 'bg-green-500';
+    if (progress < 30) return 'bg-blue-500';
+    if (progress < 70) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
 
   const getStatusIcon = () => {
     switch (status) {
       case 'connecting':
       case 'connected':
       case 'processing':
-        return <Loader2 className="h-6 w-6 animate-spin text-accent-500" />;
+        return <Clock className="h-6 w-6 animate-spin text-blue-500" />;
       case 'completed':
         return <CheckCircle className="h-6 w-6 text-green-500" />;
       case 'error':
-      case 'disconnected':
-        return <AlertTriangle className="h-6 w-6 text-wine-500" />;
+        return <XCircle className="h-6 w-6 text-red-500" />;
       default:
-        return <Clock className="h-6 w-6 text-navy-500" />;
+        return <AlertTriangle className="h-6 w-6 text-yellow-500" />;
     }
-  };
-
-  const getStatusColor = () => {
-    switch (status) {
-      case 'completed':
-        return 'text-green-600 dark:text-green-400';
-      case 'error':
-      case 'disconnected':
-        return 'text-wine-600 dark:text-wine-400';
-      default:
-        return 'text-navy-600 dark:text-accent-400';
-    }
-  };
-
-  const getProgressBarColor = () => {
-    if (progress >= 100) return 'bg-green-500';
-    if (status === 'error') return 'bg-wine-500';
-    return 'bg-accent-500';
   };
 
   return (
     <div className="card">
-      <div className="flex items-center space-x-4 mb-6">
-        {getStatusIcon()}
-        <div className="flex-1">
-          <h3 className="section-title mb-2">Procesando Análisis</h3>
-          <p className={`text-sm ${getStatusColor()}`}>
-            {message}
-          </p>
-          {/* ✅ NUEVA información de configuración */}
-          <p className="text-xs text-navy-500 dark:text-cream-500 mt-1">
-            📊 Analizando hasta {maxComments} comentarios
-          </p>
-        </div>
-      </div>
-
-      {/* Barra de progreso */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-navy-700 dark:text-cream-300">
-            Progreso
-          </span>
-          <span className="text-sm font-bold text-navy-800 dark:text-cream-200">
-            {Math.max(0, Math.min(100, progress))}%
-          </span>
-        </div>
-        
-        <div className="w-full bg-cream-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-          <div 
-            className={`h-full transition-all duration-500 ease-out ${getProgressBarColor()}`}
-            style={{ 
-              width: `${Math.max(0, Math.min(100, progress))}%`,
-              backgroundImage: status === 'processing' ? 
-                'linear-gradient(45deg, transparent 25%, rgba(255,255,255,0.3) 25%, rgba(255,255,255,0.3) 50%, transparent 50%, transparent 75%, rgba(255,255,255,0.3) 75%)' : 
-                'none',
-              backgroundSize: status === 'processing' ? '20px 20px' : 'auto',
-              animation: status === 'processing' ? 'progressStripes 1s linear infinite' : 'none'
-            }}
-          />
-        </div>
-      </div>
-
-      {/* GIF divertido */}
-      <div className="text-center py-6">
-        <div className="inline-block relative">
-          <img 
-            src="/img/gifgodzilla.gif" 
-            alt="Godzilla analizando..." 
-            className="h-32 w-auto mx-auto rounded-lg shadow-md"
-            style={{ imageRendering: 'pixelated' }}
-          />
-          <div className="mt-3">
-            <p className="text-sm text-navy-600 dark:text-cream-400 font-medium">
-              🦖 Godzilla está analizando {maxComments} comentarios...
-            </p>
-            <p className="text-xs text-navy-500 dark:text-cream-500 mt-1">
-              {maxComments <= 50 ? 'Proceso rápido' : 
-               maxComments <= 200 ? 'Proceso moderado' : 
-               maxComments <= 500 ? 'Proceso extenso' : 'Proceso muy extenso'} - 
-              Este proceso puede tomar {
-                maxComments <= 50 ? '1-2 minutos' : 
-                maxComments <= 200 ? '2-4 minutos' : 
-                maxComments <= 500 ? '4-7 minutos' : '7-12 minutos'
-              }
+      <div className="space-y-6">
+        {/* Header con GIF */}
+        <div className="flex items-center space-x-4">
+          {/* 🎬 TU GIF RESTAURADO */}
+          <div className="relative">
+            {status === 'processing' || status === 'connected' ? (
+              <img 
+                src="/img/gifgodzilla.gif" 
+                alt="Cargando..." 
+                className="h-16 w-16 rounded-lg object-cover"
+              />
+            ) : (
+              <div className="h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
+                {getStatusIcon()}
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-navy-800 dark:text-cream-100">
+              Análisis en Progreso
+            </h3>
+            <p className="text-sm text-navy-600 dark:text-cream-300">
+              {maxComments ? `Analizando hasta ${maxComments} comentarios` : 'Procesando solicitud...'}
             </p>
           </div>
+          
+          <div className="text-right">
+            <div className="text-3xl font-bold text-navy-800 dark:text-cream-100">
+              {Math.round(progress)}%
+            </div>
+            <div className="text-xs text-navy-500 dark:text-cream-400">
+              Completado
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Información adicional - ACTUALIZADA */}
-      <div className="border-t border-cream-200 dark:border-gray-700 pt-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-          <div>
-            <p className="text-navy-500 dark:text-cream-500">Estado:</p>
-            <p className={`font-medium ${getStatusColor()}`}>
-              {status === 'connecting' && 'Conectando...'}
+        {/* Barra de progreso MEJORADA */}
+        <div className="space-y-3">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+            <div 
+              className={`h-4 rounded-full transition-all duration-700 ease-out ${getProgressBarColor()}`}
+              style={{ 
+                width: `${Math.min(Math.max(progress, 0), 100)}%`,
+                boxShadow: progress > 0 ? '0 2px 8px rgba(59, 130, 246, 0.3)' : 'none'
+              }}
+            />
+          </div>
+          
+          {/* Mensaje de estado con más detalle */}
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-navy-700 dark:text-cream-200 font-medium flex-1">
+              {message}
+            </span>
+            <span className="text-navy-500 dark:text-cream-400 text-xs">
+              ID: {sessionId?.substring(0, 8)}...
+            </span>
+          </div>
+        </div>
+
+        {/* Información detallada */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+          <div className="text-center">
+            <div className="text-sm font-medium text-navy-700 dark:text-cream-300">Estado</div>
+            <div className={`text-xs px-2 py-1 rounded-full mt-1 ${
+              status === 'connecting' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+              status === 'connected' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+              status === 'processing' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+              status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+              'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+            }`}>
+              {status === 'connecting' && 'Conectando'}
               {status === 'connected' && 'Conectado'}
               {status === 'processing' && 'Procesando'}
               {status === 'completed' && 'Completado'}
               {status === 'error' && 'Error'}
-              {status === 'disconnected' && 'Desconectado'}
-            </p>
+            </div>
           </div>
           
-          {/* ✅ NUEVA información de comentarios */}
-          <div>
-            <p className="text-navy-500 dark:text-cream-500">Comentarios:</p>
-            <p className="font-medium text-navy-700 dark:text-cream-300">
-              Máximo {maxComments}
-            </p>
+          <div className="text-center">
+            <div className="text-sm font-medium text-navy-700 dark:text-cream-300">Progreso</div>
+            <div className="text-xs text-navy-600 dark:text-cream-400 mt-1">
+              {progress < 20 ? 'Iniciando...' :
+               progress < 40 ? 'Configurando...' :
+               progress < 60 ? 'Extrayendo...' :
+               progress < 80 ? 'Analizando...' :
+               progress < 95 ? 'Finalizando...' : 'Completado'}
+            </div>
           </div>
           
-          <div>
-            <p className="text-navy-500 dark:text-cream-500">Tiempo estimado:</p>
-            <p className="font-medium text-navy-700 dark:text-cream-300">
-              {progress < 20 ? 
-                (maxComments <= 50 ? '1-2 min' : 
-                 maxComments <= 200 ? '2-4 min' : 
-                 maxComments <= 500 ? '4-7 min' : '7-12 min') : 
-               progress < 60 ? 
-                (maxComments <= 50 ? '30-60s' : 
-                 maxComments <= 200 ? '1-2 min' : 
-                 maxComments <= 500 ? '2-4 min' : '4-7 min') : 
-               progress < 90 ? '30-60s' : '10-30s'}
-            </p>
+          <div className="text-center">
+            <div className="text-sm font-medium text-navy-700 dark:text-cream-300">Comentarios</div>
+            <div className="text-xs text-navy-600 dark:text-cream-400 mt-1">
+              {maxComments ? `Max: ${maxComments}` : 'Configurando...'}
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <div className="text-sm font-medium text-navy-700 dark:text-cream-300">WebSocket</div>
+            <div className="text-xs mt-1">
+              <span className={`px-2 py-1 rounded-full ${
+                websocket?.readyState === WebSocket.OPEN 
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' 
+                  : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+              }`}>
+                {websocket?.readyState === WebSocket.OPEN ? 'Activo' : 'Inactivo'}
+              </span>
+            </div>
           </div>
         </div>
+
+        {/* Debug info MEJORADO */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">
+            <div><strong>🔧 Debug Info:</strong></div>
+            <div>Session ID: {sessionId}</div>
+            <div>WebSocket State: {websocket?.readyState} 
+              {websocket?.readyState === WebSocket.OPEN && ' (CONECTADO ✅)'}
+            </div>
+            <div>Progress: {progress}%</div>
+            <div>Status: {status}</div>
+            <div>Message: {message}</div>
+            <div>Has Connected: {hasConnected.toString()}</div>
+          </div>
+        )}
       </div>
     </div>
   );

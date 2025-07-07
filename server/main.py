@@ -10,7 +10,7 @@ import server.database.db_manager as database
 import server.scraper.scrp as scrp
 from server.core.config import setting
 from server.scraper.progress_manager import progress_manager
-from server.scraper.scrp_socket import scrape_youtube_comments_async
+from server.scraper.scrp_socket import scrape_youtube_comments_with_progress  # ✅ Usar versión síncrona con WebSocket
 
 # Importar las rutas de toxicidad
 from server.ml.api.toxicity_routes import router as toxicity_router
@@ -124,10 +124,14 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
         # 1. Scraping con progreso
         await progress_manager.send_progress(session_id, 5, f"🎬 Iniciando análisis de video ({max_comments} comentarios)...")
         
-        scrape_data = await scrape_youtube_comments_async(
-            video_url, 
-            max_comments=max_comments, 
-            session_id=session_id
+        # ✅ EJECUTAR TU SCRAPER DE scrp_socket.py EN UN EXECUTOR (NO BLOQUEA EL SERVIDOR)
+        loop = asyncio.get_event_loop()
+        scrape_data = await loop.run_in_executor(
+            None,  # Usar executor por defecto
+            scrape_youtube_comments_with_progress,  # ✅ CAMBIAR A LA FUNCIÓN CORRECTA
+            video_url,
+            max_comments,
+            session_id
         )
         
         # ✅ VALIDAR scrape_data
@@ -180,30 +184,36 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
                 }
             }
         
-        # 3. Guardar en base de datos (opcional)
+        # 3. Intentar guardar en base de datos (NO BLOQUEAR si falla)
         await progress_manager.send_progress(session_id, 95, "💾 Guardando resultados...")
         
-        # TODO: Implementar guardado si lo necesitas
-        # try:
-        #     enhanced_data = analysis.get('enhanced_scraped_data', scrape_data)
-        #     database.insert_video_from_scrapper(enhanced_data)
-        #     logger.info("✅ Datos guardados en base de datos")
-        # except Exception as e:
-        #     logger.warning(f"⚠️ Error guardando en BD: {e}")
+        bd_success = False
+        try:
+            enhanced_data = analysis.get('enhanced_scraped_data', scrape_data)
+            database.insert_video_from_scrapper(enhanced_data)
+            logger.info("✅ Datos guardados en base de datos")
+            bd_success = True
+        except Exception as e:
+            logger.warning(f"⚠️ Error guardando en BD: {e}")
+            # NO fallar aquí, solo logear el error
         
         await asyncio.sleep(1)
         
-        # 4. Finalización exitosa
+        # 4. ✅ SIEMPRE ENVIAR RESULTADO AL FRONTEND (aunque falle la BD)
         result = {
             "video_url": video_url,
             "max_comments_requested": max_comments,
             "actual_comments_found": scrape_data.get('total_comments', 0),
             "actual_replies_found": scrape_data.get('total_threads', 0),
             "scraping_data": scrape_data,
-            "analysis": analysis
+            "analysis": analysis,
+            "database_saved": bd_success  # ✅ Indicar si se guardó en BD
         }
         
         logger.info(f"🎉 Análisis completado exitosamente para {video_url}")
+        logger.info(f"📊 Resultado: {analysis.get('total_comments', 0)} comentarios, {analysis.get('toxic_comments', 0)} tóxicos ({analysis.get('toxicity_rate', 0)*100:.1f}%)")
+        
+        # ✅ ENVIAR SIEMPRE AL FRONTEND
         await progress_manager.send_completion(session_id, True, result)
         
     except Exception as e:

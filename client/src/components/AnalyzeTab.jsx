@@ -276,10 +276,10 @@ const AnalyzeTab = () => {
           {/* Información básica siempre visible */}
           <div className="flex items-center justify-between text-xs text-navy-600 dark:text-cream-400">
             <span>
-              📊 Se analizarán hasta <strong>{maxComments}</strong> comentarios
+              Se analizarán hasta <strong>{maxComments}</strong> comentarios
             </span>
             <span>
-              ⏱️ Tiempo estimado: <strong>
+              Tiempo estimado: <strong>
                 {maxComments <= 50 ? '1-2 minutos' : 
                  maxComments <= 200 ? '2-4 minutos' : 
                  maxComments <= 500 ? '4-7 minutos' : '7-12 minutos'}
