@@ -39,13 +39,16 @@ class Thread(Base):
     fk_video_id = Column(Integer, ForeignKey('videos.id'), nullable=False)
     fk_request_id = Column(Integer, ForeignKey('requests.id'), nullable=False)
     fk_author_id = Column(Integer, ForeignKey('authors.id'), nullable=True)
+    parent_comment_id = Column(Integer, ForeignKey('threads.id'), nullable=True)
     comment = Column(Text)
     inserted_at = Column(DateTime, nullable=False)
 
     video = relationship("Video", back_populates="threads")
     request = relationship("Request", back_populates="threads")
     author_obj = relationship("Author", back_populates="threads")
-
+    
+    # Establishing a self-referential relationship for replies
+    parent = relationship("Thread", remote_side=[id], backref="replies")
 
 class Author(Base):
     __tablename__ = 'authors'

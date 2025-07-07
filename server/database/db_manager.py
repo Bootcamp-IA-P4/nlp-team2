@@ -77,7 +77,58 @@ def update_video(session, video, data, now):
             video.updated_at = now  # O usa updated_at si tienes
         except Exception as e:
             raise Exception(f"Error updating video: {e}")
-        
+
+def create_thread(session, video, request, thread_data, now, parent_comment_id=None):
+    author_name = thread_data["author"]
+
+    # Buscar o crear autor
+    author = session.query(Author).filter_by(name=author_name).first()
+    if author is None:
+        author = Author(name=author_name)
+        session.add(author)
+        session.flush()
+
+    thread = Thread(
+        fk_video_id=video.id,
+        fk_request_id=request.id,
+        fk_author_id=author.id,
+        comment=thread_data.get("comment", ""),
+        inserted_at=now,
+        parent_comment_id=parent_comment_id
+    )
+    session.add(thread)
+    session.flush()  # Necesario para obtener el ID si es padre
+    return thread
+
+
+def insert_threads(session, video, request, threads_data, now):
+    try:
+        for thread_data in threads_data:
+            # Insertar comentario principal
+            parent_thread = create_thread(
+                session=session,
+                video=video,
+                request=request,
+                thread_data=thread_data,
+                now=now,
+                parent_comment_id=None
+            )
+
+            # Insertar replies (si existen)
+            if thread_data.get("has_replies") and thread_data.get("replies"):
+                for reply_data in thread_data["replies"]:
+                    create_thread(
+                        session=session,
+                        video=video,
+                        request=request,
+                        thread_data=reply_data,
+                        now=now,
+                        parent_comment_id=parent_thread.id
+                    )
+    except Exception as e:
+        raise Exception(f"Error inserting threads: {e}")
+
+
 def insert_video_from_scrapper(data):
     try:
         print("📽 Processing video request ...")
@@ -101,26 +152,7 @@ def insert_video_from_scrapper(data):
         session.flush()  # To ensure request.id is available
 
 
-        # Insertar nuevos threads con referencia a Request y Author
-        for thread_data in data.get("threads", []):
-            author_name = thread_data["author"]
-
-            # Buscar autor en DB
-            author = session.query(Author).filter_by(name=author_name).first()
-            if author is None:
-                # Crear nuevo autor si no existe
-                author = Author(name=author_name)
-                session.add(author)
-                session.flush()  # Para tener author.id
-
-            thread = Thread(
-                fk_video_id=video.id,
-                fk_request_id=request.id,
-                fk_author_id=author.id,  # Asignar fk_author_id
-                comment=thread_data["comment"],
-                inserted_at=now
-            )
-            session.add(thread)
+        insert_threads(session, video, request, data.get("threads", []), now)
 
         session.commit()
         session.close()
