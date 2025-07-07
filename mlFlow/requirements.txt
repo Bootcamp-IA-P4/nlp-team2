@@ -1,0 +1,16 @@
+numpy
+pandas
+matplotlib
+seaborn
+plotly
+scikit-learn
+nltk
+wordcloud
+mlflow
+emoji
+jupyter
+transformers
+torch
+datasets
+accelerate
+vaderSentiment
