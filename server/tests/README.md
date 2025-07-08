@@ -1,6 +1,7 @@
 # Sistema de Tests - NLP Team 2
 
 Este README describe exclusivamente el sistema de testing del proyecto: cómo funciona, cómo ejecutarlo y cómo interpretar los resultados.
+Este conjunto de tests esta desarrollado con Copilot integramente utilizando 'Ingeniería de Pronts'.
 
 ## 📋 Tabla de Contenidos
 
@@ -167,10 +168,10 @@ python -m pytest --cov=../ --cov-report=term
 ==================== test session starts ====================
 collected 94 items
 
-test_print_dev.py ........................                [ 25%]
-test_scrp.py .......................                     [ 50%]
-test_database.py ..................                      [ 69%]
-test_main.py .............................              [100%]
+test_print_dev.py ........................               [ 25%]
+test_scrp.py .............................               [ 50%]
+test_database.py .........................               [ 69%]
+test_main.py .............................               [100%]
 
 ==================== 94 passed in 12.73s ====================
 ```
