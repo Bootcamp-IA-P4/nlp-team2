@@ -37,8 +37,11 @@ class Request(Base):
 
     video = relationship("Video", back_populates="requests")
     request_threads = relationship("RequestThread", back_populates="request", cascade="all, delete-orphan")
-    threads = relationship("Thread", secondary="request_threads", viewonly=True)
-
+    
+    # Add this property to easily access threads
+    @property
+    def threads(self):
+        return [rt.thread for rt in self.request_threads]
 class Thread(Base):
     __tablename__ = 'threads'
 

@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, joinedload
-from .models import Base, Video, Thread , Request, Author
+from .models import Base, Video, Thread , Request, Author, RequestThread
 from dotenv import load_dotenv
 import os
 import argparse
@@ -113,12 +113,21 @@ def create_thread(session, video, request, thread_data, now, parent_comment_id=N
     )
 
     session.add(thread)
-    session.flush()  # Necesario para obtener el ID si es padre
-    return thread
+    session.flush()  # Necesario para obtener el ID
 
+    # **NEW: Create the request-thread relationship**
+    request_thread = RequestThread(
+        fk_request_id=request.id,
+        fk_thread_id=thread.id
+    )
+    session.add(request_thread)
+    
+    return thread
 
 def insert_threads(session, video, request, threads_data, now):
     try:
+        created_threads = []  # Track created threads
+        
         for thread_data in threads_data:
             # Insertar comentario principal
             parent_thread = create_thread(
@@ -129,11 +138,12 @@ def insert_threads(session, video, request, threads_data, now):
                 now=now,
                 parent_comment_id=None
             )
+            created_threads.append(parent_thread)
 
             # Insertar replies (si existen)
             if thread_data.get("has_replies") and thread_data.get("replies"):
                 for reply_data in thread_data["replies"]:
-                    create_thread(
+                    reply_thread = create_thread(
                         session=session,
                         video=video,
                         request=request,
@@ -141,9 +151,11 @@ def insert_threads(session, video, request, threads_data, now):
                         now=now,
                         parent_comment_id=parent_thread.id
                     )
+                    created_threads.append(reply_thread)
+        
+        return created_threads
     except Exception as e:
         raise Exception(f"Error inserting threads: {e}")
-
 
 def insert_video_from_scrapper(data):
     try:
@@ -196,7 +208,91 @@ def get_request_by_id(request_id):
         return request
     except Exception as e:
         raise Exception(f"Error retrieving request by ID: {e}")
-    
+
+def create_request_thread_relationships(session, request, threads):
+    """
+    Create RequestThread relationships for existing threads
+    Useful for batch operations or migrations
+    """
+    try:
+        for thread in threads:
+            # Check if relationship already exists
+            existing = session.query(RequestThread).filter_by(
+                fk_request_id=request.id,
+                fk_thread_id=thread.id
+            ).first()
+            
+            if not existing:
+                request_thread = RequestThread(
+                    fk_request_id=request.id,
+                    fk_thread_id=thread.id
+                )
+                session.add(request_thread)
+        
+        session.flush()
+    except Exception as e:
+        raise Exception(f"Error creating request-thread relationships: {e}")
+
+def get_threads_by_request(request_id):
+    """
+    Get all threads associated with a specific request
+    """
+    try:
+        session = open_session()
+        threads = session.query(Thread).join(
+            RequestThread, Thread.id == RequestThread.fk_thread_id
+        ).filter(
+            RequestThread.fk_request_id == request_id
+        ).all()
+        session.close()
+        return threads
+    except Exception as e:
+        raise Exception(f"Error retrieving threads by request: {e}")
+
+def get_requests_by_thread(thread_id):
+    """
+    Get all requests that include a specific thread
+    """
+    try:
+        session = open_session()
+        requests = session.query(Request).join(
+            RequestThread, Request.id == RequestThread.fk_request_id
+        ).filter(
+            RequestThread.fk_thread_id == thread_id
+        ).all()
+        session.close()
+        return requests
+    except Exception as e:
+        raise Exception(f"Error retrieving requests by thread: {e}")
+
+def get_request_with_threads(request_id):
+    """
+    Get a request with all its associated threads
+    """
+    try:
+        session = open_session()
+        request = session.query(Request).options(
+            joinedload(Request.video)
+        ).filter(Request.id == request_id).first()
+        
+        if request:
+            # Get associated threads
+            threads = session.query(Thread).join(
+                RequestThread, Thread.id == RequestThread.fk_thread_id
+            ).filter(
+                RequestThread.fk_request_id == request_id
+            ).options(
+                joinedload(Thread.author_obj)
+            ).all()
+            
+            # Add threads to request object (not persisted, just for convenience)
+            request.associated_threads = threads
+        
+        session.close()
+        return request
+    except Exception as e:
+        raise Exception(f"Error retrieving request with threads: {e}")
+
 def main():
     try:
         parser = argparse.ArgumentParser(description="Database manager script")
