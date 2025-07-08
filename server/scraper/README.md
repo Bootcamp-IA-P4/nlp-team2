@@ -119,7 +119,7 @@ chrome_options.add_argument("--disable-gpu")
   "threads": [
     {
       "author": "Usuario1",
-      "content": "Excelente video! 👍",
+      "comment": "Excelente video! 👍",
       "likes": 5,
       "published_time": "hace 2 días",
       "emojis": ["👍"],
@@ -129,7 +129,7 @@ chrome_options.add_argument("--disable-gpu")
       "replies": [
         {
           "author": "Usuario2",
-          "content": "Totalmente de acuerdo",
+          "comment": "Totalmente de acuerdo",
           "likes": 1,
           "emojis": [],
           "emoji_count": 0
