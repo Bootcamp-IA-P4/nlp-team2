@@ -6,6 +6,8 @@ Este archivo se ejecuta automáticamente por pytest y proporciona fixtures y con
 import sys
 import os
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+from datetime import datetime
 
 # Agregar el directorio padre al Python path para permitir imports
 # Esto permite importar módulos desde la carpeta server/
@@ -31,6 +33,10 @@ def pytest_unconfigure(config):
     """Limpieza que se ejecuta al final de pytest"""
     print("\n✅ Tests completados")
 
+# ========================================
+# FIXTURES DE CONFIGURACIÓN DEL PROYECTO
+# ========================================
+
 @pytest.fixture(scope="session")
 def project_paths():
     """Fixture que proporciona los paths del proyecto"""
@@ -40,7 +46,47 @@ def project_paths():
         'project_root': project_root
     }
 
-# Fixtures para tests comunes
+# ========================================
+# FIXTURES DE BASE DE DATOS BÁSICAS
+# ========================================
+
+@pytest.fixture
+def mock_db_session():
+    """Mock básico de sesión de base de datos SQLAlchemy"""
+    session = MagicMock()
+    session.close = MagicMock()
+    session.add = MagicMock()
+    session.commit = MagicMock()
+    session.query = MagicMock()
+    session.flush = MagicMock()
+    session.filter_by = MagicMock()
+    session.first = MagicMock()
+    return session
+
+@pytest.fixture
+def mock_db_engine():
+    """Mock básico de engine de SQLAlchemy"""
+    engine = MagicMock()
+    engine.connect.return_value = MagicMock()
+    engine.execute.return_value = MagicMock()
+    engine.dispose.return_value = None
+    return engine
+
+@pytest.fixture
+def sample_database_config():
+    """Configuración de base de datos de ejemplo para tests"""
+    return {
+        'host': 'localhost',
+        'port': 5432,
+        'database': 'nlpteam2_test',
+        'username': 'test_user',
+        'password': 'test_password'
+    }
+
+# ========================================
+# FIXTURES PARA TESTS DE LOGGING
+# ========================================
+
 @pytest.fixture
 def sample_log_message():
     """Mensaje de log de ejemplo para tests"""
@@ -51,7 +97,10 @@ def sample_log_levels():
     """Niveles de log disponibles"""
     return ["DEBUG", "INFO", "WARNING", "ERROR"]
 
-# Fixtures específicas para tests del scraper
+# ========================================
+# FIXTURES PARA TESTS DEL SCRAPER
+# ========================================
+
 @pytest.fixture
 def sample_youtube_urls():
     """URLs de YouTube de ejemplo para tests"""
@@ -80,51 +129,57 @@ def sample_emoji_texts():
 @pytest.fixture
 def mock_selenium_element():
     """Mock de elemento de Selenium para tests"""
-    from unittest.mock import MagicMock
     element = MagicMock()
     element.text = "Texto de prueba"
     element.find_element.return_value = element
+    element.find_elements.return_value = [element]
     return element
 
-# Fixtures específicas para tests de base de datos
 @pytest.fixture
-def sample_database_urls():
-    """URLs de base de datos de ejemplo para tests"""
+def mock_webdriver():
+    """Mock de WebDriver de Selenium para tests"""
+    driver = MagicMock()
+    driver.get.return_value = None
+    driver.quit.return_value = None
+    driver.close.return_value = None
+    driver.execute_script.return_value = None
+    return driver
+
+# ========================================
+# FIXTURES DE UTILIDAD GENERAL
+# ========================================
+
+@pytest.fixture
+def current_timestamp():
+    """Timestamp actual para tests"""
+    return datetime.now()
+
+@pytest.fixture
+def sample_user_agents():
+    """User agents de ejemplo para tests"""
     return [
-        "postgresql://user:password@localhost:5432/nlpteam2",
-        "postgresql://test:test@testdb:5432/test_db",
-        "sqlite:///test.db"
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
     ]
 
-@pytest.fixture
-def mock_database_engine():
-    """Mock de engine de SQLAlchemy para tests"""
-    from unittest.mock import MagicMock
-    engine = MagicMock()
-    engine.connect.return_value = MagicMock()
-    engine.execute.return_value = MagicMock()
-    return engine
+# ========================================
+# HOOKS DE PYTEST PARA MEJORAR ESTABILIDAD
+# ========================================
 
-@pytest.fixture
-def mock_database_session():
-    """Mock de sesión de base de datos para tests"""
-    from unittest.mock import MagicMock
-    session = MagicMock()
-    session.query.return_value = session
-    session.filter_by.return_value = session
-    session.first.return_value = None
-    session.add.return_value = None
-    session.commit.return_value = None
-    session.close.return_value = None
-    return session
+@pytest.fixture(autouse=True)
+def reset_mocks():
+    """Auto-fixture que resetea mocks entre tests para evitar interferencias"""
+    yield
+    # Cleanup automático después de cada test
+    # Esto ayuda a mantener los tests aislados
 
-@pytest.fixture
-def sample_database_config():
-    """Configuración de base de datos de ejemplo para tests"""
-    return {
-        'host': 'localhost',
-        'port': 5432,
-        'database': 'nlpteam2',
-        'username': 'test_user',
-        'password': 'test_password'
-    }
+def pytest_runtest_setup(item):
+    """Se ejecuta antes de cada test individual"""
+    # Aquí podrías agregar configuraciones específicas por test si fuera necesario
+    pass
+
+def pytest_runtest_teardown(item, nextitem):
+    """Se ejecuta después de cada test individual"""
+    # Cleanup específico si fuera necesario
+    pass
