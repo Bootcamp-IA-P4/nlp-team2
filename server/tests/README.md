@@ -172,19 +172,25 @@ test_scrp.py .......................                     [ 50%]
 test_database.py ..................                      [ 69%]
 test_main.py .............................              [100%]
 
-==================== 94 passed, 2 warnings in 13.82s ====================
+==================== 94 passed in 12.73s ====================
 ```
 
 ### Salida de Cobertura
 ```
-Name                     Stmts   Miss  Cover
---------------------------------------------
-core/print_dev.py          57      2    96%
-scraper/scrp.py           359    273    24%
-database/db_manager.py    122     83    32%
-main.py                    19     17    11%
---------------------------------------------
-TOTAL                     557    375    33%
+Name                      Stmts   Miss  Cover
+-------------------------------------------------------
+core/config.py                7      0   100%
+core/print_dev.py            57      2    96%
+database/models.py           41      0   100%
+scraper/scrp.py             359    273    24%
+database/db_manager.py      122     83    32%
+main.py                      19     17    11%
+test_print_dev.py           147      2    99%
+test_main.py                474     53    89%
+test_scrp.py                195      0   100%
+test_database.py            200      0   100%
+-------------------------------------------------------
+TOTAL                      2092    851    59%
 ```
 
 ### Símbolos de Estado
