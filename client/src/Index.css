@@ -7,73 +7,136 @@
     font-family: 'Inter', system-ui, sans-serif;
     margin: 0;
     min-height: 100vh;
-    background-color: #edf2f4;
+    background-color: #fefefe; /* Crema muy claro */
     transition: background-color 0.3s ease;
   }
   
   .dark body {
-    background-color: #111827;
+    background-color: #0f1419; /* Azul muy oscuro */
   }
 }
 
 @layer components {
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors duration-300;
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-cream-300 dark:border-gray-700 p-6 transition-colors duration-300;
   }
   
   .metric-card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 hover:shadow-md transition-all duration-300;
+    @apply bg-cream-50 dark:bg-gray-800 rounded-lg shadow-sm border border-cream-200 dark:border-gray-700 p-4 hover:shadow-md transition-all duration-300;
   }
   
-  /* Estilos específicos para títulos */
+  /* Títulos con mejor contraste */
   .page-title {
-    @apply text-2xl font-bold text-gray-800 dark:text-gray-100;
+    @apply text-2xl font-bold text-navy-800 dark:text-cream-100;
   }
   
   .section-title {
-    @apply text-lg font-semibold text-gray-800 dark:text-gray-100;
+    @apply text-lg font-semibold text-navy-700 dark:text-cream-200;
   }
   
   .metric-label {
-    @apply text-sm font-medium text-gray-600 dark:text-gray-400;
+    @apply text-sm font-medium text-navy-600 dark:text-cream-400;
   }
   
+  /* Valores de métricas con colores de tu paleta */
   .metric-value-primary {
-    @apply text-2xl font-bold text-primary-500 dark:text-accent-400;
+    @apply text-2xl font-bold text-navy-600 dark:text-accent-400;
   }
   
   .metric-value-danger {
-    @apply text-2xl font-bold text-secondary-500 dark:text-secondary-400;
+    @apply text-2xl font-bold text-wine-600 dark:text-secondary-400;
   }
   
   .metric-value-success {
     @apply text-2xl font-bold text-green-600 dark:text-green-400;
   }
   
-  /* Botones con colores de la paleta */
+  /* Botones con tu paleta */
   .btn-primary {
-    @apply bg-primary-500 hover:bg-primary-600 dark:bg-accent-500 dark:hover:bg-accent-600 text-white px-4 py-2 rounded-lg transition-colors;
+    @apply bg-navy-500 hover:bg-navy-600 dark:bg-accent-500 dark:hover:bg-accent-600 text-white px-4 py-2 rounded-lg transition-colors font-medium;
   }
   
   .btn-danger {
-    @apply bg-secondary-500 hover:bg-secondary-600 dark:bg-secondary-400 dark:hover:bg-secondary-500 text-white px-4 py-2 rounded-lg transition-colors;
+    @apply bg-wine-500 hover:bg-wine-600 dark:bg-secondary-500 dark:hover:bg-secondary-600 text-white px-4 py-2 rounded-lg transition-colors font-medium;
   }
   
-  /* Enlaces con estilo */
+  .btn-secondary {
+    @apply bg-cream-300 hover:bg-cream-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-navy-700 dark:text-cream-100 px-4 py-2 rounded-lg transition-colors font-medium;
+  }
+  
+  /* Enlaces */
   .link-primary {
-    @apply text-secondary-500 hover:text-secondary-600 dark:text-secondary-400 dark:hover:text-secondary-300 transition-colors;
+    @apply text-wine-600 hover:text-wine-700 dark:text-secondary-400 dark:hover:text-secondary-300 transition-colors;
   }
   
-  /* Tabla con mejor contraste */
+  /* Tablas con mejor contraste */
   .table-header {
-    @apply text-left py-2 px-4 font-medium text-gray-600 dark:text-gray-300;
+    @apply text-left py-2 px-4 font-medium text-navy-700 dark:text-cream-300 bg-cream-100 dark:bg-gray-700;
   }
   
   .table-cell {
-    @apply py-3 px-4 text-gray-600 dark:text-gray-400;
+    @apply py-3 px-4 text-navy-600 dark:text-cream-400;
   }
   
   .table-cell-primary {
-    @apply py-3 px-4 text-gray-900 dark:text-gray-100;
+    @apply py-3 px-4 text-navy-800 dark:text-cream-100;
   }
+
+  /* Estados de toxicidad */
+  .toxicity-safe {
+    @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-800;
+  }
+  
+  .toxicity-moderate {
+    @apply bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800;
+  }
+  
+  .toxicity-high {
+    @apply bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-800;
+  }
+  
+  .toxicity-critical {
+    @apply bg-wine-100 dark:bg-wine-900/30 text-wine-800 dark:text-wine-300 border-wine-200 dark:border-wine-800;
+  }
+
+  /* Inputs con mejor estilo */
+  .input-primary {
+    @apply px-4 py-2 border border-cream-300 dark:border-gray-600 rounded-lg 
+           bg-white dark:bg-gray-700 text-navy-800 dark:text-cream-100
+           focus:ring-2 focus:ring-accent-500 focus:border-transparent 
+           placeholder-navy-400 dark:placeholder-cream-500 transition-colors;
+  }
+}
+
+/* Agregar al final del archivo */
+
+@keyframes progressStripes {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 20px 0;
+  }
+}
+
+/* Mejoras para el loader */
+.loader-container {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Animación suave para el progreso */
+.progress-bar {
+  transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Efecto hover para el GIF */
+.loading-gif {
+  transition: transform 0.3s ease;
+}
+
+.loading-gif:hover {
+  transform: scale(1.05);
 }
