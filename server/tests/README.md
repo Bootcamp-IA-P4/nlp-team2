@@ -127,11 +127,17 @@ python -m pytest --cov=../ --cov-report=term
 - **Archivos específicos**: `htmlcov/[nombre_archivo].html`
 
 ### Estado Actual de Cobertura
-- **core/print_dev.py**: ~96%
-- **scraper/scrp.py**: ~24%
-- **database/db_manager.py**: ~32%
-- **main.py**: ~11%
-- **Total del proyecto**: ~61%
+- **core/config.py**: 100% (7 líneas)
+- **core/print_dev.py**: 96% (57 líneas, 2 sin cubrir)
+- **database/models.py**: 100% (41 líneas)
+- **scraper/scrp.py**: 24% (359 líneas, 273 sin cubrir)
+- **database/db_manager.py**: 32% (122 líneas, 83 sin cubrir)
+- **main.py**: 11% (19 líneas, 17 sin cubrir)
+- **test_print_dev.py**: 99% (147 líneas, 2 sin cubrir)
+- **test_main.py**: 89% (474 líneas, 53 sin cubrir)
+- **test_scrp.py**: 100% (195 líneas)
+- **test_database.py**: 100% (200 líneas)
+- **Total del proyecto**: 59% (2092 líneas, 851 sin cubrir)
 
 ## 🔬 Tipos de Tests
 
@@ -301,9 +307,9 @@ python -m pytest -s
 ## 🎯 Métricas de Calidad
 
 ### Objetivos de Cobertura
-- **Módulos core**: >90% (✅ core/print_dev.py: 96%)
+- **Módulos core**: >90% (✅ core/print_dev.py: 96%, core/config.py: 100%)
 - **Módulos principales**: >70% (⚠️ pendiente)
-- **Total del proyecto**: >80% (🔄 actual: 61%)
+- **Total del proyecto**: >80% (🔄 actual: 59%)
 
 ### Estado de Estabilidad
 - **Tasa de éxito**: 100% (94/94 tests)
@@ -311,6 +317,7 @@ python -m pytest -s
 - **Mocks centralizados**: ✅ Configurados
 - **CI/CD ready**: ✅ Scripts preparados
 - **Archivos optimizados**: ✅ Unificación completada
+- **Cobertura total**: 59% (2092 líneas)
 
 ---
 
