@@ -64,9 +64,61 @@ async def prediction_request(data: dict):
 
 @app.get("/"+setting.version+"/prediction_list")
 async def prediction_list():
-    return {
-        "prediction_list": database.get_request_list(),
-    }
+    """Endpoint mejorado que incluye información de toxicidad"""
+    try:
+        requests = database.get_request_list()
+        
+        # Enriquecer con información de toxicidad
+        enriched_requests = []
+        for request in requests:
+            request_dict = {
+                "id": request.id,
+                "fk_video_id": request.fk_video_id,
+                "request_date": request.request_date,
+                "created_at": request.request_date,  # Alias para compatibilidad
+                
+                # Información del video
+                "video_title": request.video.title if request.video else "Sin título",
+                "video_url": request.video.video_url if request.video else "",
+                "video_author": request.video.authors.name if request.video and request.video.authors else "Desconocido",
+                "video_description": request.video.description if request.video else "",
+                
+                # Estadísticas básicas
+                "total_comments": request.video.total_comments if request.video else 0,
+                "total_replies": request.video.total_threads if request.video else 0,
+                "total_likes": request.video.total_likes if request.video else 0,
+                "total_emojis": request.video.total_emojis if request.video else 0,
+                
+                # 🎯 INFORMACIÓN DE TOXICIDAD (si está disponible)
+                "toxicity_rate": 0.0,  # Valor por defecto
+                "categories_summary": {},
+                "toxicity_summary": None,
+                "toxicity_analysis": []
+            }
+            
+            # Si tiene análisis de toxicidad asociado
+            if hasattr(request, 'toxicity_summary') and request.toxicity_summary:
+                for summary in request.toxicity_summary:
+                    request_dict.update({
+                        "toxicity_rate": float(summary.toxicity_rate) if summary.toxicity_rate else 0.0,
+                        "categories_summary": summary.categories_summary if summary.categories_summary else {},
+                        "toxic_comments": summary.toxic_comments if summary.toxic_comments else 0,
+                        "average_toxicity": float(summary.average_toxicity) if summary.average_toxicity else 0.0,
+                        "model_info": summary.model_info if summary.model_info else {}
+                    })
+                    break  # Tomar solo el primer resumen
+            
+            enriched_requests.append(request_dict)
+        
+        return {
+            "prediction_list": enriched_requests,
+            "total_count": len(enriched_requests),
+            "has_toxicity_analysis": any(req.get("toxicity_rate", 0) > 0 for req in enriched_requests)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error en prediction_list: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/"+setting.version+"/prediction_detail/{id}")
 async def prediction_detail(id: int):

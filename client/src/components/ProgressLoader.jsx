@@ -105,13 +105,12 @@ const ProgressLoader = ({ sessionId, onComplete, onError, maxComments }) => {
       <div className="space-y-6">
         {/* Header con GIF */}
         <div className="flex items-center space-x-4">
-          {/* 🎬 TU GIF RESTAURADO */}
           <div className="relative">
             {status === 'processing' || status === 'connected' ? (
               <img 
                 src="/img/gifgodzilla.gif" 
                 alt="Cargando..." 
-                className="h-16 w-16 rounded-lg object-cover"
+                className="h-124 w-124 rounded-lg object-cover"
               />
             ) : (
               <div className="h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
