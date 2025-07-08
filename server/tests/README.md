@@ -24,8 +24,7 @@ server/tests/
 ├── pytest.ini               # Configuración de pytest
 ├── .coveragerc              # Configuración de cobertura
 ├── run_coverage.sh          # Script para ejecutar tests (Mac/Linux)
-├── run_coverage.ps1         # Script para ejecutar tests (Windows)
-├── run_coverage_simple.ps1  # Script simple para Windows (fallback)
+├── run_coverage.ps1         # Script mejorado para Windows (con detección de venv)
 ├── test_print_dev.py        # Tests del módulo de logging (24 tests)
 ├── test_scrp.py             # Tests del scraper (23 tests)
 ├── test_database.py         # Tests del gestor de base de datos (18 tests)
@@ -70,13 +69,21 @@ Contiene fixtures reutilizables y configuración global:
 ```powershell
 # desde el directorio de tests 
 cd server/tests
-# Opción 1: Script completo con emoji y colores
+
+# Ejecutar script mejorado (detecta automáticamente entorno virtual)
 ./run_coverage.ps1
 
-
-# Opción 2: Ejecutar directamente con PowerShell
+# Ejecutar directamente con PowerShell
 powershell -ExecutionPolicy Bypass -File "run_coverage.ps1"
 ```
+
+**Características del script mejorado:**
+- ✅ **Detección automática de entorno virtual** (.venv, venv, env)
+- ✅ **Compatibilidad con diferentes versiones de Windows**
+- ✅ **Detección automática de Python** (python, python3, py)
+- ✅ **Verificación de dependencias** (pytest, pytest-cov)
+- ✅ **Información detallada del sistema** en el resumen
+- ✅ **Manejo robusto de errores** con mensajes claros
 
 #### Para Mac/Linux (Bash)
 ```bash
@@ -383,10 +390,12 @@ python -m pytest -s
 4. **Scripts Multiplataforma**: Soporte completo para Mac/Linux (bash) y Windows (PowerShell)
 
 ### 🚀 Nuevas Funcionalidades
-- **Script PowerShell completo**: `run_coverage.ps1` con colores y emojis
-- **Script PowerShell simple**: `run_coverage_simple.ps1` como fallback
+- **Script PowerShell mejorado**: `run_coverage.ps1` con detección automática de entorno virtual
+- **Detección inteligente de Python**: Soporta python, python3, py en diferentes sistemas
+- **Verificación de dependencias**: Comprueba automáticamente que pytest esté instalado
 - **Detección automática de errores**: Scripts que reportan el estado de los tests
-- **Resumen mejorado**: Información detallada de cobertura por módulo
+- **Resumen mejorado**: Información detallada de cobertura y configuración del sistema
+- **Compatibilidad multiplataforma**: Funciona en Windows 10, 11, Server, etc.
 
 ### 📊 Estado Actual de Tests
 - **Tests ejecutándose**: 76/76 tests (100% éxito)
@@ -418,6 +427,9 @@ python -m pytest -s
 - ✅ **Scripts multiplataforma**: PowerShell para Windows, Bash para Mac/Linux
 - ✅ **Tests estables**: 76 tests ejecutándose sin fallos
 - ✅ **Reportes mejorados**: HTML y terminal con información detallada
+- ✅ **Detección automática de entorno virtual**: .venv, venv, env
+- ✅ **Verificación de dependencias**: pytest y pytest-cov
+- ✅ **Información del sistema**: Python usado, entorno virtual detectado
 
 ---
 
