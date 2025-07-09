@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">2.59% </span>
+                <span class="strong">3% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>5/193</span>
+                <span class='fraction'>6/200</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">2.59% </span>
+                <span class="strong">3% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>5/193</span>
+                <span class='fraction'>6/200</span>
             </div>
         
             
@@ -284,9 +284,19 @@
 <a name='L219'></a><a href='#L219'>219</a>
 <a name='L220'></a><a href='#L220'>220</a>
 <a name='L221'></a><a href='#L221'>221</a>
-<a name='L222'></a><a href='#L222'>222</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L222'></a><a href='#L222'>222</a>
+<a name='L223'></a><a href='#L223'>223</a>
+<a name='L224'></a><a href='#L224'>224</a>
+<a name='L225'></a><a href='#L225'>225</a>
+<a name='L226'></a><a href='#L226'>226</a>
+<a name='L227'></a><a href='#L227'>227</a>
+<a name='L228'></a><a href='#L228'>228</a>
+<a name='L229'></a><a href='#L229'>229</a>
+<a name='L230'></a><a href='#L230'>230</a>
+<a name='L231'></a><a href='#L231'>231</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -332,6 +342,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -498,6 +515,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -506,6 +524,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">import { useState } from 'react';
+import AppMetadata from './AppMetadata';
 import { AlertCircle, Shield, BookOpen, ExternalLink, Search } from 'lucide-react';
 import { toxicityGuide } from '../utils/mockData';
 &nbsp;
@@ -547,182 +566,190 @@ const GuideTab = <span class="fstat-no" title="function not covered" >() =&gt; {
 <span class="cstat-no" title="statement not covered" >  );</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  return (</span>
-<span class="cstat-no" title="statement not covered" >    &lt;div className="space-y-6"&gt;</span>
-      {/* Header */}
-<span class="cstat-no" title="statement not covered" >      &lt;div className="card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className="flex items-center space-x-4 mb-6"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="p-3 bg-accent-100 dark:bg-accent-900/30 rounded-lg"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;BookOpen className="h-8 w-8 text-accent-600 dark:text-accent-400" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;&gt;</span>
+      {/* 🎯 METADATA PARA GUÍA */}
+<span class="cstat-no" title="statement not covered" >      &lt;AppMetadata </span>
+<span class="cstat-no" title="statement not covered" >        pageTitle="Guía de Toxicidad"</span>
+<span class="cstat-no" title="statement not covered" >        pageDescription="Aprende sobre los diferentes tipos de contenido tóxico: crítico, alto, medio. Guía completa para identificar toxicidad en comentarios."</span>
+<span class="cstat-no" title="statement not covered" >      /&gt;</span>
+      
+<span class="cstat-no" title="statement not covered" >      &lt;div className="space-y-6"&gt;</span>
+        {/* Header */}
+<span class="cstat-no" title="statement not covered" >        &lt;div className="card"&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div className="flex items-center space-x-4 mb-6"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="p-3 bg-accent-100 dark:bg-accent-900/30 rounded-lg"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;BookOpen className="h-8 w-8 text-accent-600 dark:text-accent-400" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100"&gt;Guía de Toxicidad&lt;/h2&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-gray-600 dark:text-gray-300"&gt;Aprende sobre los diferentes tipos de contenido tóxico y cómo identificarlos&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100"&gt;Guía de Toxicidad&lt;/h2&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-gray-600 dark:text-gray-300"&gt;Aprende sobre los diferentes tipos de contenido tóxico y cómo identificarlos&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 &nbsp;
-        {/* Filtros */}
-<span class="cstat-no" title="statement not covered" >        &lt;div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="flex-1"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;div className="relative"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" /&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;input</span>
-<span class="cstat-no" title="statement not covered" >                type="text"</span>
-<span class="cstat-no" title="statement not covered" >                placeholder="Buscar categoría o descripción..."</span>
-<span class="cstat-no" title="statement not covered" >                value={searchTerm}</span>
-<span class="cstat-no" title="statement not covered" >                onChange={(e) =&gt; setSearchTerm(e.target.value)}</span>
-<span class="cstat-no" title="statement not covered" >                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg </span>
-                           bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                           focus:ring-2 focus:ring-accent-500 focus:border-transparent 
-                           placeholder-gray-500 dark:placeholder-gray-400"
-<span class="cstat-no" title="statement not covered" >              /&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;select</span>
-<span class="cstat-no" title="statement not covered" >            value={selectedCategory}</span>
-<span class="cstat-no" title="statement not covered" >            onChange={(e) =&gt; setSelectedCategory(e.target.value)}</span>
-<span class="cstat-no" title="statement not covered" >            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg </span>
-                       bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
-                       focus:ring-2 focus:ring-accent-500"
-          &gt;
-<span class="cstat-no" title="statement not covered" >            &lt;option value="all"&gt;Todos los niveles&lt;/option&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;option value="critical"&gt;Crítico&lt;/option&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;option value="high"&gt;Alto&lt;/option&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;option value="medium"&gt;Medio&lt;/option&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/select&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
-&nbsp;
-      {/* Estadísticas rápidas */}
-<span class="cstat-no" title="statement not covered" >      &lt;div className="grid grid-cols-1 md:grid-cols-4 gap-6"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className="metric-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="text-center"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;div className="flex justify-center mb-2"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;AlertCircle className="h-8 w-8 text-secondary-500 dark:text-secondary-400" /&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-2xl font-bold text-secondary-600 dark:text-secondary-400"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              {toxicityGuide.categories.filter(c =&gt; c.severity === 'critical').length}</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-sm text-gray-600 dark:text-gray-400"&gt;Nivel Crítico&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className="metric-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="text-center"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;div className="flex justify-center mb-2"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;AlertCircle className="h-8 w-8 text-orange-500 dark:text-orange-400" /&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-2xl font-bold text-orange-600 dark:text-orange-400"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              {toxicityGuide.categories.filter(c =&gt; c.severity === 'high').length}</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-sm text-gray-600 dark:text-gray-400"&gt;Nivel Alto&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className="metric-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="text-center"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;div className="flex justify-center mb-2"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;Shield className="h-8 w-8 text-yellow-500 dark:text-yellow-400" /&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              {toxicityGuide.categories.filter(c =&gt; c.severity === 'medium').length}</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-sm text-gray-600 dark:text-gray-400"&gt;Nivel Medio&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className="metric-card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="text-center"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;div className="flex justify-center mb-2"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;BookOpen className="h-8 w-8 text-accent-500 dark:text-accent-400" /&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-2xl font-bold text-accent-600 dark:text-accent-400"&gt;{toxicityGuide.categories.length}&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-sm text-gray-600 dark:text-gray-400"&gt;Total Categorías&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
-&nbsp;
-      {/* Categorías de toxicidad */}
-<span class="cstat-no" title="statement not covered" >      &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-6"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        {filteredCategories.map((category, index) =&gt; (</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div key={index} className="card hover:shadow-lg transition-shadow"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;div className="flex items-start justify-between mb-4"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;div className="flex items-center space-x-3"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                {getSeverityIcon(category.severity)}</span>
-<span class="cstat-no" title="statement not covered" >                &lt;h3 className="text-xl font-bold text-gray-800 dark:text-gray-100"&gt;{category.type}&lt;/h3&gt;</span>
+          {/* Filtros */}
+<span class="cstat-no" title="statement not covered" >          &lt;div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="flex-1"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className="relative"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 h-4 w-4" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;input</span>
+<span class="cstat-no" title="statement not covered" >                  type="text"</span>
+<span class="cstat-no" title="statement not covered" >                  placeholder="Buscar categoría o descripción..."</span>
+<span class="cstat-no" title="statement not covered" >                  value={searchTerm}</span>
+<span class="cstat-no" title="statement not covered" >                  onChange={(e) =&gt; setSearchTerm(e.target.value)}</span>
+<span class="cstat-no" title="statement not covered" >                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg </span>
+                             bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                             focus:ring-2 focus:ring-accent-500 focus:border-transparent 
+                             placeholder-gray-500 dark:placeholder-gray-400"
+<span class="cstat-no" title="statement not covered" >                /&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;span className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityColor(category.severity)}`}&gt;</span>
-<span class="cstat-no" title="statement not covered" >                {category.severity === 'critical' ? 'Crítico' : </span>
-<span class="cstat-no" title="statement not covered" >                 category.severity === 'high' ? 'Alto' : </span>
-<span class="cstat-no" title="statement not covered" >                 category.severity === 'medium' ? 'Medio' : 'Bajo'}</span>
-<span class="cstat-no" title="statement not covered" >              &lt;/span&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;select</span>
+<span class="cstat-no" title="statement not covered" >              value={selectedCategory}</span>
+<span class="cstat-no" title="statement not covered" >              onChange={(e) =&gt; setSelectedCategory(e.target.value)}</span>
+<span class="cstat-no" title="statement not covered" >              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg </span>
+                         bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100
+                         focus:ring-2 focus:ring-accent-500"
+            &gt;
+<span class="cstat-no" title="statement not covered" >              &lt;option value="all"&gt;Todos los niveles&lt;/option&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;option value="critical"&gt;Crítico&lt;/option&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;option value="high"&gt;Alto&lt;/option&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;option value="medium"&gt;Medio&lt;/option&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/select&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-gray-600 dark:text-gray-300 mb-4"&gt;{category.description}&lt;/p&gt;</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >            &lt;div className="mb-4"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2"&gt;Ejemplos comunes:&lt;/h4&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;ul className="space-y-1"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                {category.examples.map((example, exampleIndex) =&gt; (</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;li key={exampleIndex} className="flex items-center text-sm text-gray-600 dark:text-gray-400"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                    &lt;div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full mr-2"&gt;&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                    {example}</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;/li&gt;</span>
-<span class="cstat-no" title="statement not covered" >                ))}</span>
-<span class="cstat-no" title="statement not covered" >              &lt;/ul&gt;</span>
+        {/* Estadísticas rápidas */}
+<span class="cstat-no" title="statement not covered" >        &lt;div className="grid grid-cols-1 md:grid-cols-4 gap-6"&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div className="metric-card"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="text-center"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className="flex justify-center mb-2"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;AlertCircle className="h-8 w-8 text-secondary-500 dark:text-secondary-400" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-2xl font-bold text-secondary-600 dark:text-secondary-400"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                {toxicityGuide.categories.filter(c =&gt; c.severity === 'critical').length}</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-sm text-gray-600 dark:text-gray-400"&gt;Nivel Crítico&lt;/p&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div className="metric-card"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="text-center"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className="flex justify-center mb-2"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;AlertCircle className="h-8 w-8 text-orange-500 dark:text-orange-400" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-2xl font-bold text-orange-600 dark:text-orange-400"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                {toxicityGuide.categories.filter(c =&gt; c.severity === 'high').length}</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-sm text-gray-600 dark:text-gray-400"&gt;Nivel Alto&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div className="metric-card"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="text-center"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className="flex justify-center mb-2"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;Shield className="h-8 w-8 text-yellow-500 dark:text-yellow-400" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                {toxicityGuide.categories.filter(c =&gt; c.severity === 'medium').length}</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-sm text-gray-600 dark:text-gray-400"&gt;Nivel Medio&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div className="metric-card"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="text-center"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className="flex justify-center mb-2"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;BookOpen className="h-8 w-8 text-accent-500 dark:text-accent-400" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-2xl font-bold text-accent-600 dark:text-accent-400"&gt;{toxicityGuide.categories.length}&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-sm text-gray-600 dark:text-gray-400"&gt;Total Categorías&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >            &lt;div className="pt-4 border-t border-gray-200 dark:border-gray-700"&gt;</span>
-<span class="cstat-no" title="statement not covered" >              &lt;div className="flex items-center justify-between"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;div className="flex items-center space-x-2"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: category.color === 'red' ? '#ef4444' : category.color === 'orange' ? '#f97316' : category.color === 'blue' ? '#3b82f6' : category.color === 'purple' ? '#8b5cf6' : category.color === 'pink' ? '#ec4899' : '#06b6d4' }}&gt;&lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;span className="text-sm text-gray-500 dark:text-gray-400"&gt;Color de identificación&lt;/span&gt;</span>
+        {/* Categorías de toxicidad */}
+<span class="cstat-no" title="statement not covered" >        &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-6"&gt;</span>
+<span class="cstat-no" title="statement not covered" >          {filteredCategories.map((category, index) =&gt; (</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div key={index} className="card hover:shadow-lg transition-shadow"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;div className="flex items-start justify-between mb-4"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;div className="flex items-center space-x-3"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  {getSeverityIcon(category.severity)}</span>
+<span class="cstat-no" title="statement not covered" >                  &lt;h3 className="text-xl font-bold text-gray-800 dark:text-gray-100"&gt;{category.type}&lt;/h3&gt;</span>
 <span class="cstat-no" title="statement not covered" >                &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;button className="flex items-center space-x-1 text-accent-600 hover:text-accent-800 dark:text-accent-400 dark:hover:text-accent-300 text-sm"&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;span&gt;Más info&lt;/span&gt;</span>
-<span class="cstat-no" title="statement not covered" >                  &lt;ExternalLink className="h-3 w-3" /&gt;</span>
-<span class="cstat-no" title="statement not covered" >                &lt;/button&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;span className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityColor(category.severity)}`}&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  {category.severity === 'critical' ? 'Crítico' : </span>
+<span class="cstat-no" title="statement not covered" >                   category.severity === 'high' ? 'Alto' : </span>
+<span class="cstat-no" title="statement not covered" >                   category.severity === 'medium' ? 'Medio' : 'Bajo'}</span>
+<span class="cstat-no" title="statement not covered" >                &lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-gray-600 dark:text-gray-300 mb-4"&gt;{category.description}&lt;/p&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >              &lt;div className="mb-4"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-2"&gt;Ejemplos comunes:&lt;/h4&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;ul className="space-y-1"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  {category.examples.map((example, exampleIndex) =&gt; (</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;li key={exampleIndex} className="flex items-center text-sm text-gray-600 dark:text-gray-400"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                      &lt;div className="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-500 rounded-full mr-2"&gt;&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                      {example}</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;/li&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  ))}</span>
+<span class="cstat-no" title="statement not covered" >                &lt;/ul&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >              &lt;div className="pt-4 border-t border-gray-200 dark:border-gray-700"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;div className="flex items-center justify-between"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  &lt;div className="flex items-center space-x-2"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: category.color === 'red' ? '#ef4444' : category.color === 'orange' ? '#f97316' : category.color === 'blue' ? '#3b82f6' : category.color === 'purple' ? '#8b5cf6' : category.color === 'pink' ? '#ec4899' : '#06b6d4' }}&gt;&lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;span className="text-sm text-gray-500 dark:text-gray-400"&gt;Color de identificación&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  &lt;button className="flex items-center space-x-1 text-accent-600 hover:text-accent-800 dark:text-accent-400 dark:hover:text-accent-300 text-sm"&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;span&gt;Más info&lt;/span&gt;</span>
+<span class="cstat-no" title="statement not covered" >                    &lt;ExternalLink className="h-3 w-3" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >                  &lt;/button&gt;</span>
+<span class="cstat-no" title="statement not covered" >                &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >              &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >        ))}</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          ))}</span>
+<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 &nbsp;
-      {/* Información adicional */}
-<span class="cstat-no" title="statement not covered" >      &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-6"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className="card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4"&gt;¿Cómo funciona la detección?&lt;/h3&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="space-y-3 text-sm text-gray-600 dark:text-gray-300"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Análisis de texto:&lt;/strong&gt; Utilizamos modelos de NLP avanzados para analizar el contenido.&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Contexto:&lt;/strong&gt; Consideramos el contexto y las relaciones entre palabras.&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Confianza:&lt;/strong&gt; Cada detección incluye un nivel de confianza del modelo.&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Multi-etiqueta:&lt;/strong&gt; Un comentario puede pertenecer a múltiples categorías.&lt;/p&gt;</span>
+        {/* Información adicional */}
+<span class="cstat-no" title="statement not covered" >        &lt;div className="grid grid-cols-1 lg:grid-cols-2 gap-6"&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div className="card"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4"&gt;¿Cómo funciona la detección?&lt;/h3&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="space-y-3 text-sm text-gray-600 dark:text-gray-300"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Análisis de texto:&lt;/strong&gt; Utilizamos modelos de NLP avanzados para analizar el contenido.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Contexto:&lt;/strong&gt; Consideramos el contexto y las relaciones entre palabras.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Confianza:&lt;/strong&gt; Cada detección incluye un nivel de confianza del modelo.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Multi-etiqueta:&lt;/strong&gt; Un comentario puede pertenecer a múltiples categorías.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          &lt;div className="card"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4"&gt;Mejores Prácticas&lt;/h3&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="space-y-3 text-sm text-gray-600 dark:text-gray-300"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Revisión humana:&lt;/strong&gt; Siempre revisa manualmente casos de alta toxicidad.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Contexto cultural:&lt;/strong&gt; Considera diferencias culturales y regionales.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Falsos positivos:&lt;/strong&gt; El sistema puede generar algunos falsos positivos.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Actualización:&lt;/strong&gt; Los modelos se actualizan constantemente.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        &lt;div className="card"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4"&gt;Mejores Prácticas&lt;/h3&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="space-y-3 text-sm text-gray-600 dark:text-gray-300"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Revisión humana:&lt;/strong&gt; Siempre revisa manualmente casos de alta toxicidad.&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Contexto cultural:&lt;/strong&gt; Considera diferencias culturales y regionales.&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Falsos positivos:&lt;/strong&gt; El sistema puede generar algunos falsos positivos.&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p&gt;• &lt;strong className="text-gray-800 dark:text-gray-200"&gt;Actualización:&lt;/strong&gt; Los modelos se actualizan constantemente.&lt;/p&gt;</span>
+        {/* Footer con recursos */}
+<span class="cstat-no" title="statement not covered" >        &lt;div className="card bg-accent-50 dark:bg-accent-900/20 border-accent-200 dark:border-accent-800"&gt;</span>
+<span class="cstat-no" title="statement not covered" >          &lt;div className="flex items-center space-x-4"&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="p-3 bg-accent-100 dark:bg-accent-800/50 rounded-lg"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;BookOpen className="h-6 w-6 text-accent-600 dark:text-accent-400" /&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;div className="flex-1"&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;h4 className="font-semibold text-accent-900 dark:text-accent-200"&gt;¿Necesitas más ayuda?&lt;/h4&gt;</span>
+<span class="cstat-no" title="statement not covered" >              &lt;p className="text-accent-700 dark:text-accent-300 text-sm"&gt;Consulta nuestra documentación completa o contacta al equipo de soporte.&lt;/p&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >            &lt;button className="px-4 py-2 bg-accent-600 hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600 text-white rounded-lg text-sm"&gt;</span>
+              Ver Documentación
+<span class="cstat-no" title="statement not covered" >            &lt;/button&gt;</span>
 <span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
 <span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
-&nbsp;
-      {/* Footer con recursos */}
-<span class="cstat-no" title="statement not covered" >      &lt;div className="card bg-accent-50 dark:bg-accent-900/20 border-accent-200 dark:border-accent-800"&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;div className="flex items-center space-x-4"&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="p-3 bg-accent-100 dark:bg-accent-800/50 rounded-lg"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;BookOpen className="h-6 w-6 text-accent-600 dark:text-accent-400" /&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;div className="flex-1"&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;h4 className="font-semibold text-accent-900 dark:text-accent-200"&gt;¿Necesitas más ayuda?&lt;/h4&gt;</span>
-<span class="cstat-no" title="statement not covered" >            &lt;p className="text-accent-700 dark:text-accent-300 text-sm"&gt;Consulta nuestra documentación completa o contacta al equipo de soporte.&lt;/p&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >          &lt;button className="px-4 py-2 bg-accent-600 hover:bg-accent-700 dark:bg-accent-500 dark:hover:bg-accent-600 text-white rounded-lg text-sm"&gt;</span>
-            Ver Documentación
-<span class="cstat-no" title="statement not covered" >          &lt;/button&gt;</span>
-<span class="cstat-no" title="statement not covered" >        &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;/div&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/div&gt;</span>
+<span class="cstat-no" title="statement not covered" >    &lt;/&gt;</span>
   );
 <span class="cstat-no" title="statement not covered" >};</span>
 &nbsp;
@@ -733,7 +760,7 @@ export default GuideTab;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-07-09T06:14:10.160Z
+                at 2025-07-09T09:10:53.569Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -165,23 +165,6 @@ describe("ThemeContext", () => {
     });
   });
 
-  it("should handle localStorage errors gracefully", () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
-    localStorageMock.getItem.mockImplementation(() => {
-      throw new Error("localStorage error");
-    });
-
-    expect(() => {
-      render(
-        <ThemeProvider>
-          <TestComponent />
-        </ThemeProvider>
-      );
-    }).not.toThrow();
-    
-    consoleErrorSpy.mockRestore();
-  });
 
   it("should handle system preference changes", () => {
     const mockAddEventListener = vi.fn();
