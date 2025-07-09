@@ -15,7 +15,8 @@ class ToxicityPredictor:
     def __init__(self, model_path: Optional[str] = None):
         self.logger = logging.getLogger(__name__)
         
-        base_url = os.getenv("MODEL_BASE_URL", "https://www.juancarlosmacias.es/models/distilbert_model.pkl")
+        # MODEL_BASE_URL debe terminar en "/"
+        base_url = os.getenv("MODEL_BASE_URL", "https://www.juancarlosmacias.es/models/")
         
         if model_path is None:
             model_file = "distilbert_model.pkl"
@@ -177,3 +178,4 @@ class ToxicityPredictor:
             'model_loaded': getattr(self, 'model', None) is not None,
             'tokenizer_loaded': getattr(self, 'tokenizer', None) is not None
         }
+
