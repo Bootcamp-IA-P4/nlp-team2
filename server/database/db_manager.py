@@ -1,8 +1,8 @@
 import json
 from datetime import datetime
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, joinedload
-from .models import Base, Video, Thread , Request, Author, RequestThread
+from sqlalchemy.orm import sessionmaker, joinedload, Session
+from .models import Base, Video, Thread , Request, Author, RequestThread, ToxicityAnalysis, VideoToxicitySummary
 from dotenv import load_dotenv
 import os
 import argparse
@@ -191,13 +191,41 @@ def insert_video_from_scrapper(data):
         raise Exception(f"Error processing video request: {e}")
     
 def get_request_list():
+    """Obtener lista de requests con todas las relaciones cargadas"""
     try:
         session = open_session()
-        #requests = session.query(Request).join(Video, Request.fk_video_id == Video.id).all()
-        requests = session.query(Request).options(joinedload(Request.video)).all()
+        
+        # ✅ CARGAR TODAS LAS RELACIONES NECESARIAS
+        requests = session.query(Request).options(
+            joinedload(Request.video).joinedload(Video.authors)
+        ).all()
+        
+        # ✅ CONVERTIR A DICCIONARIOS DENTRO DEL CONTEXTO DE LA SESIÓN
+        result = []
+        for request in requests:
+            request_data = {
+                'id': request.id,
+                'fk_video_id': request.fk_video_id,
+                'request_date': request.request_date,
+                'video': {
+                    'id': request.video.id if request.video else None,
+                    'title': request.video.title if request.video else None,
+                    'video_url': request.video.video_url if request.video else None,
+                    'description': request.video.description if request.video else None,
+                    'total_comments': request.video.total_comments if request.video else 0,
+                    'total_threads': request.video.total_threads if request.video else 0,
+                    'total_likes': request.video.total_likes if request.video else 0,
+                    'total_emojis': request.video.total_emojis if request.video else 0,
+                    'author_name': request.video.authors.name if (request.video and request.video.authors) else "Desconocido"
+                }
+            }
+            result.append(request_data)
+        
         session.close()
-        return requests
+        return result
+        
     except Exception as e:
+        session.close()
         raise Exception(f"Error retrieving request list: {e}")
     
 def get_request_by_id(request_id):
@@ -293,6 +321,62 @@ def get_request_with_threads(request_id):
     except Exception as e:
         raise Exception(f"Error retrieving request with threads: {e}")
 
+
+def insert_toxicity_analysis(
+    session: Session,
+    fk_thread_id: int,
+    fk_request_id: int,
+    is_toxic: bool,
+    toxicity_confidence: float,
+    categories_detected: dict,
+    category_scores: dict,
+    model_version: str = "1.0.0",
+    analyzed_at: datetime = None
+):
+    analysis = ToxicityAnalysis(
+        fk_thread_id=fk_thread_id,
+        fk_request_id=fk_request_id,
+        is_toxic=is_toxic,
+        toxicity_confidence=toxicity_confidence,
+        categories_detected=categories_detected,
+        category_scores=category_scores,
+        model_version=model_version,
+        analyzed_at=analyzed_at or datetime.utcnow()
+    )
+    session.add(analysis)
+    session.commit()
+    return analysis
+
+def insert_video_toxicity_summary(
+    session: Session,
+    fk_video_id: int,
+    fk_request_id: int,
+    total_comments: int,
+    toxic_comments: int,
+    toxicity_rate: float,
+    categories_summary: dict,
+    most_toxic_thread_id: int = None,
+    average_toxicity: float = None,
+    model_info: dict = None,
+    analysis_completed_at: datetime = None
+):
+    summary = VideoToxicitySummary(
+        fk_video_id=fk_video_id,
+        fk_request_id=fk_request_id,
+        total_comments=total_comments,
+        toxic_comments=toxic_comments,
+        toxicity_rate=toxicity_rate,
+        categories_summary=categories_summary,
+        most_toxic_thread_id=most_toxic_thread_id,
+        average_toxicity=average_toxicity,
+        model_info=model_info or {},
+        analysis_completed_at=analysis_completed_at or datetime.utcnow()
+    )
+    session.add(summary)
+    session.commit()
+    return summary
+
+
 def main():
     try:
         parser = argparse.ArgumentParser(description="Database manager script")
@@ -313,5 +397,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-    
+
 
