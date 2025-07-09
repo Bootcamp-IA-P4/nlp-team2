@@ -62,9 +62,9 @@ class TestMainModule:
         with open(main_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Contar funciones de endpoint
-        function_count = content.count("async def read_root") + content.count("def read_root")
-        assert function_count >= 3, "No se encontraron suficientes funciones de endpoint"
+        # Contar funciones de endpoint (ajustado para los endpoints reales)
+        endpoint_count = content.count("@app.get") + content.count("@app.post") + content.count("@app.websocket")
+        assert endpoint_count >= 3, f"No se encontraron suficientes endpoints, solo {endpoint_count}"
         
         # Verificar rutas específicas
         assert "prediction_request" in content
@@ -362,7 +362,7 @@ class TestMainCodeExecution:
         """Test: Verifica constantes y variables de main.py"""
         main_path = os.path.join(os.path.dirname(__file__), '..', 'main.py')
         
-        with open(main_path, 'r') as f:
+        with open(main_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
         # Verificar que el archivo contiene las definiciones necesarias
@@ -416,7 +416,7 @@ class TestMainModuleExecution:
         """Test: Verifica que main.py se puede compilar sin errores de sintaxis"""
         main_path = os.path.join(os.path.dirname(__file__), '..', 'main.py')
         
-        with open(main_path, 'r') as f:
+        with open(main_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
         # Intentar compilar el código
@@ -587,7 +587,7 @@ class TestMainRealImport:
             # Solo verificar que el archivo existe y es válido
             assert os.path.exists(main_path)
             
-            with open(main_path, 'r') as f:
+            with open(main_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
             # Verificar estructura sin importar FastAPI
