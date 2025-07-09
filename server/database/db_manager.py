@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, joinedload, Session
-from .models import Base, Video, Thread , Request, Author, RequestThread, ToxicityAnalysis, VideoToxicitySummary
+from .models import Base, Video, Thread , Request, Author, RequestThread, VideoToxicitySummary, ToxicityAnalysis, ToxicityAnalysis, VideoToxicitySummary
 from dotenv import load_dotenv
 import os
 import argparse
@@ -320,6 +320,147 @@ def get_request_with_threads(request_id):
         return request
     except Exception as e:
         raise Exception(f"Error retrieving request with threads: {e}")
+
+def save_toxicity_analysis(analysis_data, request_id: int, video_id: int) -> bool:
+    """Guardar resultados del análisis de toxicidad en la base de datos"""
+    try:
+        session = open_session()
+        now = datetime.now()
+        
+        # 🎯 1. GUARDAR RESUMEN GENERAL (VideoToxicitySummary)
+        toxicity_summary = VideoToxicitySummary(
+            fk_video_id=video_id,
+            fk_request_id=request_id,
+            total_comments=analysis_data.get('total_analyzed', 0),
+            toxic_comments=analysis_data.get('total_toxic', 0),
+            toxicity_rate=analysis_data.get('toxicity_rate', 0.0),
+            categories_summary=analysis_data.get('summary', {}).get('categories_found', {}),
+            average_toxicity=analysis_data.get('summary', {}).get('average_toxicity', 0.0),
+            model_info=analysis_data.get('summary', {}).get('model_info', {}),
+            analysis_completed_at=now
+        )
+        
+        # Encontrar el thread más tóxico si existe
+        most_toxic = analysis_data.get('summary', {}).get('most_toxic_comment')
+        if most_toxic and most_toxic.get('metadata'):
+            thread_idx = most_toxic['metadata'].get('thread_index')
+            if thread_idx is not None:
+                # Buscar el thread correspondiente
+                thread_query = session.query(Thread).join(
+                    RequestThread, Thread.id == RequestThread.fk_thread_id
+                ).filter(
+                    RequestThread.fk_request_id == request_id,
+                    Thread.parent_comment_id.is_(None)  # Solo comentarios principales
+                ).offset(thread_idx).limit(1).first()
+                
+                if thread_query:
+                    toxicity_summary.most_toxic_thread_id = thread_query.id
+        
+        session.add(toxicity_summary)
+        session.flush()  # Para obtener el ID
+        
+        # 🎯 2. GUARDAR ANÁLISIS INDIVIDUAL POR THREAD (ToxicityAnalysis)
+        saved_analyses = 0
+        
+        # Procesar comentarios principales
+        for analysis in analysis_data.get('main_comments_analysis', []):
+            if analysis.get('metadata'):
+                thread_idx = analysis['metadata'].get('thread_index')
+                if thread_idx is not None:
+                    # Buscar el thread correspondiente
+                    thread_query = session.query(Thread).join(
+                        RequestThread, Thread.id == RequestThread.fk_thread_id
+                    ).filter(
+                        RequestThread.fk_request_id == request_id,
+                        Thread.parent_comment_id.is_(None)  # Solo comentarios principales
+                    ).offset(thread_idx).limit(1).first()
+                    
+                    if thread_query:
+                        toxicity_analysis = ToxicityAnalysis(
+                            fk_thread_id=thread_query.id,
+                            fk_request_id=request_id,
+                            is_toxic=analysis.get('is_toxic', False),
+                            toxicity_confidence=analysis.get('toxicity_confidence', 0.0),
+                            categories_detected=analysis.get('categories_detected', []),
+                            category_scores=analysis.get('category_scores', {}),
+                            model_version=analysis_data.get('summary', {}).get('model_info', {}).get('version', '1.0.0'),
+                            analyzed_at=now
+                        )
+                        session.add(toxicity_analysis)
+                        saved_analyses += 1
+        
+        # Procesar respuestas
+        for analysis in analysis_data.get('replies_analysis', []):
+            if analysis.get('metadata'):
+                thread_idx = analysis['metadata'].get('thread_index')
+                reply_idx = analysis['metadata'].get('reply_index')
+                
+                if thread_idx is not None and reply_idx is not None:
+                    # Buscar el thread de respuesta correspondiente
+                    parent_thread = session.query(Thread).join(
+                        RequestThread, Thread.id == RequestThread.fk_thread_id
+                    ).filter(
+                        RequestThread.fk_request_id == request_id,
+                        Thread.parent_comment_id.is_(None)  # Comentario principal
+                    ).offset(thread_idx).limit(1).first()
+                    
+                    if parent_thread:
+                        # Buscar la respuesta específica
+                        reply_thread = session.query(Thread).filter(
+                            Thread.parent_comment_id == parent_thread.id
+                        ).offset(reply_idx).limit(1).first()
+                        
+                        if reply_thread:
+                            toxicity_analysis = ToxicityAnalysis(
+                                fk_thread_id=reply_thread.id,
+                                fk_request_id=request_id,
+                                is_toxic=analysis.get('is_toxic', False),
+                                toxicity_confidence=analysis.get('toxicity_confidence', 0.0),
+                                categories_detected=analysis.get('categories_detected', []),
+                                category_scores=analysis.get('category_scores', {}),
+                                model_version=analysis_data.get('summary', {}).get('model_info', {}).get('version', '1.0.0'),
+                                analyzed_at=now
+                            )
+                            session.add(toxicity_analysis)
+                            saved_analyses += 1
+        
+        session.commit()
+        session.close()
+        
+        print(f"✅ Análisis de toxicidad guardado: {saved_analyses} análisis individuales + 1 resumen")
+        return True
+        
+    except Exception as e:
+        session.rollback()
+        session.close()
+        print(f"❌ Error guardando análisis de toxicidad: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+def get_toxicity_summary_by_request(request_id: int):
+    """Obtener resumen de toxicidad para un request específico"""
+    try:
+        session = open_session()
+        summary = session.query(VideoToxicitySummary).filter_by(fk_request_id=request_id).first()
+        session.close()
+        return summary
+        
+    except Exception as e:
+        print(f"Error obteniendo resumen de toxicidad: {e}")
+        return None
+
+def get_toxicity_analyses_by_request(request_id: int):
+    """Obtener todos los análisis de toxicidad para un request específico"""
+    try:
+        session = open_session()
+        analyses = session.query(ToxicityAnalysis).filter_by(fk_request_id=request_id).all()
+        session.close()
+        return analyses
+        
+    except Exception as e:
+        print(f"Error obteniendo análisis de toxicidad: {e}")
+        return []
 
 
 def insert_toxicity_analysis(
