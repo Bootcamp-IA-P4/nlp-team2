@@ -67,3 +67,4 @@ checkpoints/
 .coveragerc
 htmlcov/
 .pytest_cache/
+/client/coverage/
