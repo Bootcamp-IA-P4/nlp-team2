@@ -90,38 +90,57 @@ def update_video(session, video, data, now):
             raise Exception(f"Error updating video: {e}")
 
 def create_thread(session, video, request, thread_data, now, parent_comment_id=None):
-    author_name = thread_data["author"]
+    from models import Thread, Author, RequestThread
 
-    # Buscar o crear autor
+    # 1. Obtener o crear el autor
+    author_name = thread_data.get("author_name")
     author = session.query(Author).filter_by(name=author_name).first()
-    if author is None:
+    if not author:
         author = Author(name=author_name)
         session.add(author)
-        session.flush()
+        session.commit()
 
-    thread = Thread(
+    # 2. Buscar si ya existe un thread con mismo contenido, autor, vídeo y parent
+    thread = session.query(Thread).filter_by(
         fk_video_id=video.id,
         fk_author_id=author.id,
         parent_comment_id=parent_comment_id,
-        comment=thread_data.get("comment"),
-        likes=thread_data.get("likes", 0),
-        published_time=thread_data.get("published_time"),
-        emoji_count=thread_data.get("emoji_count", 0),
-        emojis=thread_data.get("emojis", []),
-        has_replies=thread_data.get("has_replies", False),
-        replies_count=thread_data.get("replies_count", 0)
-    )
+        comment=thread_data.get("comment")
+    ).first()
 
-    session.add(thread)
-    session.flush()  # Necesario para obtener el ID
+    if not thread:
+        # 3. Crear thread si no existe
+        thread = Thread(
+            fk_video_id=video.id,
+            fk_author_id=author.id,
+            parent_comment_id=parent_comment_id,
+            comment=thread_data.get("comment"),
+            updated_at=now,
+            likes=thread_data.get("likes", 0),
+            published_time=thread_data.get("published_time"),
+            emoji_count=thread_data.get("emoji_count", 0),
+            emojis=thread_data.get("emojis", {}),
+            has_replies=thread_data.get("has_replies", False),
+            replies_count=thread_data.get("replies_count", 0)
+        )
+        session.add(thread)
+        session.commit()
 
-    # **NEW: Create the request-thread relationship**
-    request_thread = RequestThread(
+    # 4. Verificar si el thread ya está vinculado al request actual
+    existing_link = session.query(RequestThread).filter_by(
         fk_request_id=request.id,
         fk_thread_id=thread.id
-    )
-    session.add(request_thread)
-    
+    ).first()
+
+    if not existing_link:
+        # 5. Crear vínculo si no existe
+        request_thread = RequestThread(
+            fk_request_id=request.id,
+            fk_thread_id=thread.id
+        )
+        session.add(request_thread)
+        session.commit()
+
     return thread
 
 def insert_threads(session, video, request, threads_data, now):
