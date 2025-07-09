@@ -191,13 +191,41 @@ def insert_video_from_scrapper(data):
         raise Exception(f"Error processing video request: {e}")
     
 def get_request_list():
+    """Obtener lista de requests con todas las relaciones cargadas"""
     try:
         session = open_session()
-        #requests = session.query(Request).join(Video, Request.fk_video_id == Video.id).all()
-        requests = session.query(Request).options(joinedload(Request.video)).all()
+        
+        # ✅ CARGAR TODAS LAS RELACIONES NECESARIAS
+        requests = session.query(Request).options(
+            joinedload(Request.video).joinedload(Video.authors)
+        ).all()
+        
+        # ✅ CONVERTIR A DICCIONARIOS DENTRO DEL CONTEXTO DE LA SESIÓN
+        result = []
+        for request in requests:
+            request_data = {
+                'id': request.id,
+                'fk_video_id': request.fk_video_id,
+                'request_date': request.request_date,
+                'video': {
+                    'id': request.video.id if request.video else None,
+                    'title': request.video.title if request.video else None,
+                    'video_url': request.video.video_url if request.video else None,
+                    'description': request.video.description if request.video else None,
+                    'total_comments': request.video.total_comments if request.video else 0,
+                    'total_threads': request.video.total_threads if request.video else 0,
+                    'total_likes': request.video.total_likes if request.video else 0,
+                    'total_emojis': request.video.total_emojis if request.video else 0,
+                    'author_name': request.video.authors.name if (request.video and request.video.authors) else "Desconocido"
+                }
+            }
+            result.append(request_data)
+        
         session.close()
-        return requests
+        return result
+        
     except Exception as e:
+        session.close()
         raise Exception(f"Error retrieving request list: {e}")
     
 def get_request_by_id(request_id):
@@ -369,5 +397,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-    
+
 
