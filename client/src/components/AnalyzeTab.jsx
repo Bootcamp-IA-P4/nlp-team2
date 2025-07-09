@@ -488,6 +488,39 @@ const AnalyzeTab = () => {
                   </div>
                 </div>
 
+                {/* Estadísticas separadas */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="metric-card">
+                    <h4 className="text-sm font-medium text-gray-600">Comentarios Principales</h4>
+                    <p className="text-2xl font-bold text-primary-500">
+                      {analysisResult.analysis.total_comments}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {analysisResult.analysis.toxic_comments} tóxicos ({(analysisResult.analysis.main_comments_toxicity_rate * 100).toFixed(1)}%)
+                    </p>
+                  </div>
+                  
+                  <div className="metric-card">
+                    <h4 className="text-sm font-medium text-gray-600">Respuestas</h4>
+                    <p className="text-2xl font-bold text-accent-500">
+                      {analysisResult.analysis.total_replies}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {analysisResult.analysis.toxic_replies} tóxicas ({(analysisResult.analysis.replies_toxicity_rate * 100).toFixed(1)}%)
+                    </p>
+                  </div>
+                  
+                  <div className="metric-card">
+                    <h4 className="text-sm font-medium text-gray-600">Total Analizado</h4>
+                    <p className="text-2xl font-bold text-secondary-500">
+                      {analysisResult.analysis.total_analyzed}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {analysisResult.analysis.total_toxic} tóxicos ({(analysisResult.analysis.toxicity_rate * 100).toFixed(1)}%)
+                    </p>
+                  </div>
+                </div>
+
                 {/* Categorías encontradas */}
                 {Object.keys(analysisResult.analysis.summary.categories_found).length > 0 && (
                   <div className="card">

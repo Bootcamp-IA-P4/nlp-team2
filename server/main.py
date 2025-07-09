@@ -66,47 +66,38 @@ async def prediction_request(data: dict):
 async def prediction_list():
     """Endpoint mejorado que incluye información de toxicidad"""
     try:
-        requests = database.get_request_list()
+        # ✅ USAR LA FUNCIÓN ACTUALIZADA QUE MANEJA LAS SESIONES CORRECTAMENTE
+        requests_data = database.get_request_list()
         
         # Enriquecer con información de toxicidad
         enriched_requests = []
-        for request in requests:
+        for request_data in requests_data:
+            video_data = request_data.get('video', {})
+            
             request_dict = {
-                "id": request.id,
-                "fk_video_id": request.fk_video_id,
-                "request_date": request.request_date,
-                "created_at": request.request_date,  # Alias para compatibilidad
+                "id": request_data['id'],
+                "fk_video_id": request_data['fk_video_id'],
+                "request_date": request_data['request_date'].isoformat() if request_data['request_date'] else None,
+                "created_at": request_data['request_date'].isoformat() if request_data['request_date'] else None,
                 
                 # Información del video
-                "video_title": request.video.title if request.video else "Sin título",
-                "video_url": request.video.video_url if request.video else "",
-                "video_author": request.video.authors.name if request.video and request.video.authors else "Desconocido",
-                "video_description": request.video.description if request.video else "",
+                "video_title": video_data.get('title', "Sin título"),
+                "video_url": video_data.get('video_url', ""),
+                "video_author": video_data.get('author_name', "Desconocido"),
+                "video_description": video_data.get('description', ""),
                 
                 # Estadísticas básicas
-                "total_comments": request.video.total_comments if request.video else 0,
-                "total_replies": request.video.total_threads if request.video else 0,
-                "total_likes": request.video.total_likes if request.video else 0,
-                "total_emojis": request.video.total_emojis if request.video else 0,
+                "total_comments": video_data.get('total_comments', 0),
+                "total_replies": video_data.get('total_threads', 0),
+                "total_likes": video_data.get('total_likes', 0),
+                "total_emojis": video_data.get('total_emojis', 0),
                 
-                # 🎯 INFORMACIÓN DE TOXICIDAD (si está disponible)
-                "toxicity_rate": 0.0,  # Valor por defecto
+                # 🎯 INFORMACIÓN DE TOXICIDAD (valores por defecto)
+                "toxicity_rate": 0.0,
                 "categories_summary": {},
                 "toxicity_summary": None,
                 "toxicity_analysis": []
             }
-            
-            # Si tiene análisis de toxicidad asociado
-            if hasattr(request, 'toxicity_summary') and request.toxicity_summary:
-                for summary in request.toxicity_summary:
-                    request_dict.update({
-                        "toxicity_rate": float(summary.toxicity_rate) if summary.toxicity_rate else 0.0,
-                        "categories_summary": summary.categories_summary if summary.categories_summary else {},
-                        "toxic_comments": summary.toxic_comments if summary.toxic_comments else 0,
-                        "average_toxicity": float(summary.average_toxicity) if summary.average_toxicity else 0.0,
-                        "model_info": summary.model_info if summary.model_info else {}
-                    })
-                    break  # Tomar solo el primer resumen
             
             enriched_requests.append(request_dict)
         
@@ -118,6 +109,8 @@ async def prediction_list():
         
     except Exception as e:
         logger.error(f"Error en prediction_list: {e}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/"+setting.version+"/prediction_detail/{id}")
@@ -257,9 +250,18 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
             "max_comments_requested": max_comments,
             "actual_comments_found": scrape_data.get('total_comments', 0),
             "actual_replies_found": scrape_data.get('total_threads', 0),
+            
+            # 🎯 ESTADÍSTICAS DETALLADAS
+            "total_analyzed": analysis.get('total_analyzed', 0),
+            "main_comments_analyzed": analysis.get('total_comments', 0),
+            "replies_analyzed": analysis.get('total_replies', 0),
+            "toxic_main_comments": analysis.get('toxic_comments', 0),
+            "toxic_replies": analysis.get('toxic_replies', 0),
+            "total_toxic": analysis.get('total_toxic', 0),
+            
             "scraping_data": scrape_data,
             "analysis": analysis,
-            "database_saved": bd_success  # ✅ Indicar si se guardó en BD
+            "database_saved": bd_success
         }
         
         logger.info(f"🎉 Análisis completado exitosamente para {video_url}")
