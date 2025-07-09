@@ -110,7 +110,7 @@ const ProgressLoader = ({ sessionId, onComplete, onError, maxComments }) => {
               <img 
                 src="/img/gifgodzilla.gif" 
                 alt="Cargando..." 
-                className="h-124 w-124 rounded-lg object-cover"
+                className="h-96 w-96 rounded-lg object-cover"
               />
             ) : (
               <div className="h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
