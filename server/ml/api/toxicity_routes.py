@@ -5,7 +5,7 @@ import logging
 from server.ml.pipeline import ToxicityPipeline
 
 # Configurar router
-router = APIRouter(prefix="/api/v1/toxicity", tags=["toxicity"])
+router = APIRouter(prefix="/v1/toxicity", tags=["toxicity"])  # ← Quitar /api/
 logger = logging.getLogger(__name__)
 
 # Inicializar pipeline global
@@ -62,7 +62,7 @@ def analyze_multiple_comments(request: CommentsRequest):
         results = toxicity_pipeline.predictor.predict_batch(request.comments)
         
         # Estadísticas rápidas
-        toxic_count = sum(1 for r in results if r['is_toxic'])
+        toxic_count = sum(1 for r in results if r.get('is_toxic', False))
         
         return {
             'success': True,
