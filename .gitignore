@@ -16,6 +16,7 @@ __pycache__
 .env*
 /.env
 *.json
+!server/ml/model/partes_modelo/metadatos.json
 
 # Node
 npm-debug.log
@@ -56,6 +57,7 @@ checkpoints/
 *.csv
 *.tsv
 *.json
+!server/ml/model/partes_modelo/metadatos.json
 *.parquet
 *.pkl
 *.txt
