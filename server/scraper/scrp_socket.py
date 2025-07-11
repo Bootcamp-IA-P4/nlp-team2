@@ -35,7 +35,7 @@ class YouTubeCommentScraperChrome:
         
     def emit_progress(self, percentage, message):
         """Emitir progreso tanto por callback como por WebSocket (VERSIÓN SÍNCRONA)"""
-        print(f"📊 [{percentage}%] {message}")  # Log en consola
+        log_info(f"📊 [{percentage}%] {message}")  # Log en consola
         
         # Callback original
         if self.progress_callback:
@@ -54,13 +54,13 @@ class YouTubeCommentScraperChrome:
                         )
                         loop.close()
                     except Exception as e:
-                        print(f"⚠️ Error enviando progreso por WebSocket: {e}")
+                        log_info(f"⚠️ Error enviando progreso por WebSocket: {e}")
                 
                 thread = threading.Thread(target=send_to_websocket, daemon=True)
                 thread.start()
                 
             except Exception as e:
-                print(f"⚠️ Error configurando WebSocket: {e}")
+                log_info(f"⚠️ Error configurando WebSocket: {e}")
     
     def setup_driver(self):
         """Configurar Chrome Driver (VERSIÓN SÍNCRONA)"""
@@ -89,14 +89,14 @@ class YouTubeCommentScraperChrome:
         chrome_options.add_experimental_option('useAutomationExtension', False)
         
         try:
-            print("🐳 Configurando Chrome para Docker...")
+            log_info("🐳 Configurando Chrome para Docker...")
             
             # Intentar primero con ChromeDriverManager
             try:
                 self.emit_progress(10, "🔧 Instalando ChromeDriver automático...")
                 service = Service(ChromeDriverManager().install())
                 self.driver = webdriver.Chrome(service=service, options=chrome_options)
-                print("✅ ChromeDriver automático configurado en Docker")
+                log_info("✅ ChromeDriver automático configurado en Docker")
                 self.emit_progress(15, "✅ ChromeDriver automático configurado")
                 
                 # Configurar script para evitar detección
@@ -109,7 +109,7 @@ class YouTubeCommentScraperChrome:
             # Intentar con Chrome del sistema
             try:
                 self.driver = webdriver.Chrome(options=chrome_options)
-                print("✅ Chrome del sistema configurado en Docker")
+                log_info("✅ Chrome del sistema configurado en Docker")
                 self.emit_progress(15, "✅ Chrome del sistema configurado")
                 
                 # Configurar script para evitar detección
@@ -136,14 +136,14 @@ class YouTubeCommentScraperChrome:
     def scroll_to_load_comments(self, max_comments=100):
         """Cargar comentarios con scroll (VERSIÓN SÍNCRONA)"""
         self.emit_progress(20, f"📜 Cargando comentarios... (máximo {max_comments})")
-        print(f"📜 Cargando comentarios... (máximo {max_comments})")
+        log_info(f"📜 Cargando comentarios... (máximo {max_comments})")
         
         # ✅ SCROLL MÁS AGRESIVO Y DEBUG
         for i in range(5):
             scroll_position = 800 + (i * 400)
             self.driver.execute_script(f"window.scrollTo(0, {scroll_position});")
             time.sleep(2)
-            print(f"🔄 Scroll {i+1}/5 a posición {scroll_position}")
+            log_info(f"🔄 Scroll {i+1}/5 a posición {scroll_position}")
         
         # ✅ BUSCAR COMENTARIOS CON MÚLTIPLES SELECTORES
         comment_selectors = [
@@ -162,31 +162,31 @@ class YouTubeCommentScraperChrome:
         for selector in comment_selectors:
             try:
                 elements = self.driver.find_elements(By.CSS_SELECTOR, selector)
-                print(f"🔍 Selector '{selector}': encontró {len(elements)} elementos")
+                log_info(f"🔍 Selector '{selector}': encontró {len(elements)} elementos")
                 if elements:
                     comments_found = len(elements)
                     working_selector = selector
-                    print(f"✅ Usando selector: {selector}")
+                    log_info(f"✅ Usando selector: {selector}")
                     break
             except Exception as e:
-                print(f"❌ Error con selector {selector}: {e}")
+                log_info(f"❌ Error con selector {selector}: {e}")
         
         # ✅ DEBUG ADICIONAL SI NO ENCUENTRA COMENTARIOS
         if comments_found == 0:
-            print("⚠️ No se encontraron comentarios con ningún selector")
+            log_info("⚠️ No se encontraron comentarios con ningún selector")
             
             # Verificar si la sección de comentarios existe
             try:
                 comments_section = self.driver.find_element(By.CSS_SELECTOR, "#comments")
-                print("📍 ✅ Sección de comentarios (#comments) encontrada")
+                log_info("📍 ✅ Sección de comentarios (#comments) encontrada")
             except:
-                print("📍 ❌ Sección de comentarios (#comments) NO encontrada")
+                log_info("📍 ❌ Sección de comentarios (#comments) NO encontrada")
             
             try:
                 ytd_comments = self.driver.find_element(By.CSS_SELECTOR, "ytd-comments")
-                print("📍 ✅ Elemento ytd-comments encontrado")
+                log_info("📍 ✅ Elemento ytd-comments encontrado")
             except:
-                print("📍 ❌ Elemento ytd-comments NO encontrado")
+                log_info("📍 ❌ Elemento ytd-comments NO encontrado")
             
             # Verificar si los comentarios están deshabilitados
             try:
@@ -214,18 +214,18 @@ class YouTubeCommentScraperChrome:
                         # Si aparece en un contexto que indica que están realmente deshabilitados
                         if ("section" in context or "video" in context or "turn" in context):
                             actually_disabled = True
-                            print(f"🚫 ❌ Los comentarios están REALMENTE DESHABILITADOS: '{phrase}'")
-                            print(f"📄 Contexto: {context}")
+                            log_info(f"🚫 ❌ Los comentarios están REALMENTE DESHABILITADOS: '{phrase}'")
+                            log_info(f"📄 Contexto: {context}")
                             break
                 
                 if not actually_disabled:
                     if "comment" in page_source.lower():
-                        print("💭 ✅ La palabra 'comment' aparece en la página")
+                        log_info("💭 ✅ La palabra 'comment' aparece en la página")
                         comment_count = page_source.lower().count("comment")
-                        print(f"📊 'comment' aparece {comment_count} veces en el HTML")
+                        log_info(f"📊 'comment' aparece {comment_count} veces en el HTML")
                         
                         # ✅ INTENTAR FORZAR CARGA DE COMENTARIOS
-                        print("🔄 Intentando forzar carga de comentarios...")
+                        log_info("🔄 Intentando forzar carga de comentarios...")
                         
                         # Scroll más agresivo a la sección de comentarios
                         try:
@@ -233,7 +233,7 @@ class YouTubeCommentScraperChrome:
                             comments_section = self.driver.find_element(By.CSS_SELECTOR, "#comments")
                             self.driver.execute_script("arguments[0].scrollIntoView(true);", comments_section)
                             time.sleep(3)
-                            print("📍 ✅ Scroll hasta sección de comentarios")
+                            log_info("📍 ✅ Scroll hasta sección de comentarios")
                             
                             # Scroll adicional para cargar comentarios
                             for i in range(5):
@@ -244,32 +244,32 @@ class YouTubeCommentScraperChrome:
                                 # Verificar si aparecieron comentarios
                                 new_comments = len(self.driver.find_elements(By.CSS_SELECTOR, "ytd-comment-thread-renderer"))
                                 if new_comments > 0:
-                                    print(f"🎉 ¡Comentarios encontrados después del scroll {i+1}! ({new_comments} comentarios)")
+                                    log_info(f"🎉 ¡Comentarios encontrados después del scroll {i+1}! ({new_comments} comentarios)")
                                     comments_found = new_comments
                                     working_selector = "ytd-comment-thread-renderer"
                                     break
                                 else:
-                                    print(f"⏳ Scroll {i+1}/5 - Aún sin comentarios...")
+                                    log_info(f"⏳ Scroll {i+1}/5 - Aún sin comentarios...")
                         
                         except Exception as e:
-                            print(f"❌ Error en scroll forzado: {e}")
+                            log_info(f"❌ Error en scroll forzado: {e}")
                 else:
-                    print("🚫 ❌ Los comentarios están DESHABILITADOS en este video")
+                    log_info("🚫 ❌ Los comentarios están DESHABILITADOS en este video")
             
             except Exception as e:
-                print(f"❌ Error verificando HTML: {e}")
+                log_info(f"❌ Error verificando HTML: {e}")
             
             # Intentar hacer screenshot para debug
             try:
                 self.driver.save_screenshot("debug_no_comments.png")
-                print("📸 Screenshot guardado como debug_no_comments.png")
+                log_info("📸 Screenshot guardado como debug_no_comments.png")
             except Exception as e:
-                print(f"❌ Error guardando screenshot: {e}")
+                log_info(f"❌ Error guardando screenshot: {e}")
             
             return  # Salir si no hay comentarios
         
         # ✅ CONTINUAR CON SCROLL SI ENCONTRAMOS COMENTARIOS
-        print(f"🎯 Encontrados {comments_found} comentarios iniciales, continuando con scroll...")
+        log_info(f"🎯 Encontrados {comments_found} comentarios iniciales, continuando con scroll...")
         
         last_height = self.driver.execute_script("return document.documentElement.scrollHeight")
         comments_loaded = comments_found
@@ -288,22 +288,22 @@ class YouTubeCommentScraperChrome:
                 comments_loaded = current_comments
                 progress = 60 + (10 * min(comments_loaded / max_comments, 1))
                 self.emit_progress(int(progress), f"📝 Comentarios cargados: {comments_loaded}")
-                print(f"📝 Comentarios cargados: {comments_loaded}")
+                log_info(f"📝 Comentarios cargados: {comments_loaded}")
                 scroll_attempts = 0
             else:
                 scroll_attempts += 1
-                print(f"⏳ Intento de scroll {scroll_attempts}/{max_scroll_attempts}")
+                log_info(f"⏳ Intento de scroll {scroll_attempts}/{max_scroll_attempts}")
             
             # Verificar si la página sigue creciendo
             new_height = self.driver.execute_script("return document.documentElement.scrollHeight")
             if new_height == last_height and comments_loaded >= 1:
                 self.emit_progress(70, f"🔚 Carga completada con {comments_loaded} comentarios")
-                print(f"🔚 Altura de página estabilizada en {comments_loaded} comentarios")
+                log_info(f"🔚 Altura de página estabilizada en {comments_loaded} comentarios")
                 break
             last_height = new_height
             
             if comments_loaded >= max_comments:
-                print(f"🎯 Objetivo alcanzado: {comments_loaded} comentarios")
+                log_info(f"🎯 Objetivo alcanzado: {comments_loaded} comentarios")
                 break
     
     def extract_comment_data(self, comment_element):
@@ -392,7 +392,7 @@ class YouTubeCommentScraperChrome:
                 content == "Contenido no disponible" or 
                 content == "" or 
                 author == ""):
-                print(f"⚠️ Saltando comentario con datos inválidos: author='{author}', content='{content}'")
+                log_info(f"⚠️ Saltando comentario con datos inválidos: author='{author}', content='{content}'")
                 return None
             
             # Verificar si tiene respuestas y extraerlas
@@ -428,7 +428,7 @@ class YouTubeCommentScraperChrome:
                         if numbers:
                             replies_count = int(numbers[0])
                         
-                        print(f"🔄 Encontrado botón de respuestas: '{button_text}' con {replies_count} respuestas")
+                        log_info(f"🔄 Encontrado botón de respuestas: '{button_text}' con {replies_count} respuestas")
                         
                         # Hacer clic para expandir respuestas
                         try:
@@ -465,16 +465,16 @@ class YouTubeCommentScraperChrome:
                                     for reply_selector in reply_selectors_inner:
                                         reply_elements = container.find_elements(By.CSS_SELECTOR, reply_selector)
                                         if reply_elements:
-                                            print(f"✅ Encontradas respuestas con selector: {container_selector} > {reply_selector}")
+                                            log_info(f"✅ Encontradas respuestas con selector: {container_selector} > {reply_selector}")
                                             break
                                     
                                     if reply_elements:
                                         break
                                 except Exception as inner_e:
-                                    print(f"Error con contenedor {container_selector}: {inner_e}")
+                                    log_info(f"Error con contenedor {container_selector}: {inner_e}")
                                     continue
                             
-                            print(f"💬 Encontradas {len(reply_elements)} respuestas para procesar")
+                            log_info(f"💬 Encontradas {len(reply_elements)} respuestas para procesar")
                             
                             valid_replies_count = 0
                             for reply_elem in reply_elements[:8]:  # Limitar a 8 respuestas por comentario
@@ -483,10 +483,10 @@ class YouTubeCommentScraperChrome:
                                     replies_data.append(reply_data)
                                     valid_replies_count += 1
                             
-                            print(f"✅ Procesadas {valid_replies_count} respuestas válidas de {len(reply_elements[:8])} intentadas")
+                            log_info(f"✅ Procesadas {valid_replies_count} respuestas válidas de {len(reply_elements[:8])} intentadas")
                             
                         except Exception as e:
-                            print(f"⚠️ Error expandiendo respuestas: {e}")
+                            log_info(f"⚠️ Error expandiendo respuestas: {e}")
                         
                         break
                         
@@ -584,7 +584,7 @@ class YouTubeCommentScraperChrome:
                 content == "Contenido no disponible" or 
                 content == "" or 
                 author == ""):
-                print(f"⚠️ Saltando respuesta con datos inválidos: author='{author}', content='{content}'")
+                log_info(f"⚠️ Saltando respuesta con datos inválidos: author='{author}', content='{content}'")
                 return None
             
             return {
@@ -607,7 +607,7 @@ class YouTubeCommentScraperChrome:
             self.emit_progress(10, "🚀 Iniciando proceso de scraping...")
             self.setup_driver()
             self.emit_progress(20, f"🌐 Accediendo a: {video_url}")
-            print(f"🌐 Accediendo a: {video_url}")
+            log_info(f"🌐 Accediendo a: {video_url}")
             
             # Cargar la página del video
             self.driver.get(video_url)
@@ -636,7 +636,7 @@ class YouTubeCommentScraperChrome:
                     continue
             
             self.emit_progress(35, f"✅ Título encontrado: {video_title[:50]}...")
-            print(f"🎬 Video: {video_title}")
+            log_info(f"🎬 Video: {video_title}")
             
             # Extraer ID del video de la URL
             video_id = "ID no disponible"
@@ -666,14 +666,14 @@ class YouTubeCommentScraperChrome:
                     author_element = self.driver.find_element(By.CSS_SELECTOR, selector)
                     video_author = author_element.text.strip()
                     if video_author and video_author != "":
-                        print(f"👤 Autor encontrado con selector: {selector}")
+                        log_info(f"👤 Autor encontrado con selector: {selector}")
                         break
                 except:
                     continue
             
             self.emit_progress(45, f"✅ Autor encontrado: {video_author}")
-            print(f"🆔 Video ID: {video_id}")
-            print(f"👤 Autor: {video_author}")
+            log_info(f"🆔 Video ID: {video_id}")
+            log_info(f"👤 Autor: {video_author}")
             
             # Obtener descripción del video
             self.emit_progress(50, "📝 Extrayendo descripción del video...")
@@ -702,7 +702,7 @@ class YouTubeCommentScraperChrome:
                         buttons = self.driver.find_elements(By.CSS_SELECTOR, selector)
                         for button in buttons:
                             if button.is_displayed() and button.is_enabled():
-                                print(f"🔧 Haciendo clic en botón expandir: {selector}")
+                                log_info(f"🔧 Haciendo clic en botón expandir: {selector}")
                                 self.driver.execute_script("arguments[0].click();", button)
                                 time.sleep(2)
                                 break
@@ -749,7 +749,7 @@ class YouTubeCommentScraperChrome:
                         desc_text = element.text.strip()
                         if desc_text and len(desc_text) > 10:
                             video_description = desc_text
-                            print(f"📝 Descripción encontrada con selector: {selector}")
+                            log_info(f"📝 Descripción encontrada con selector: {selector}")
                             break
                     if video_description != "Descripción no disponible":
                         break
@@ -783,12 +783,12 @@ class YouTubeCommentScraperChrome:
                     
                     if js_description and len(js_description) > 10:
                         video_description = js_description
-                        print(f"📝 Descripción encontrada con JavaScript")
+                        log_info(f"📝 Descripción encontrada con JavaScript")
                 except:
                     pass
             
             self.emit_progress(55, f"✅ Descripción extraída: {len(video_description)} caracteres")
-            print(f"📝 Descripción extraída: {len(video_description)} caracteres")
+            log_info(f"📝 Descripción extraída: {len(video_description)} caracteres")
             
             # Cargar comentarios
             self.emit_progress(60, f"📜 Cargando comentarios (máximo {max_comments})...")
@@ -799,7 +799,7 @@ class YouTubeCommentScraperChrome:
             comment_elements = self.driver.find_elements(By.CSS_SELECTOR, "ytd-comment-thread-renderer")
             total_elements = min(len(comment_elements), max_comments)
             self.emit_progress(80, f"📝 Encontrados {len(comment_elements)} comentarios, procesando {total_elements}...")
-            print(f"🔍 Procesando {len(comment_elements)} comentarios...")
+            log_info(f"🔍 Procesando {len(comment_elements)} comentarios...")
             
             for i, comment_element in enumerate(comment_elements[:max_comments]):
                 comment_data = self.extract_comment_data(comment_element)
@@ -807,7 +807,7 @@ class YouTubeCommentScraperChrome:
                     self.comments_data.append(comment_data)
                     
                 if (i + 1) % 3 == 0:
-                    print(f"✅ Procesados {i + 1} comentarios...")
+                    log_info(f"✅ Procesados {i + 1} comentarios...")
                 
                 # Actualizar progreso cada 5 comentarios para la web
                 if (i + 1) % 5 == 0 or i == total_elements - 1:
@@ -869,12 +869,12 @@ class YouTubeCommentScraperChrome:
                             )
                             loop.close()
                         except Exception as ex:
-                            print(f"⚠️ Error enviando error: {ex}")
+                            log_info(f"⚠️ Error enviando error: {ex}")
                     
                     thread = threading.Thread(target=send_error, daemon=True)
                     thread.start()
                 except Exception as ex:
-                    print(f"⚠️ Error configurando error: {ex}")
+                    log_info(f"⚠️ Error configurando error: {ex}")
             
             return None
         finally:
@@ -885,8 +885,8 @@ class YouTubeCommentScraperChrome:
 def scrape_youtube_comments_with_progress(video_url, max_comments=50, session_id=None):
     """Función wrapper síncrona para scraping con progreso por WebSocket"""
     try:
-        print(f"🎯 Iniciando scraping síncrono: {video_url} (max: {max_comments})")
-        print(f"📡 Session ID: {session_id}")
+        log_info(f"🎯 Iniciando scraping síncrono: {video_url} (max: {max_comments})")
+        log_info(f"📡 Session ID: {session_id}")
         
         # Crear scraper con WebSocket
         scraper = YouTubeCommentScraperChrome(
@@ -897,11 +897,11 @@ def scrape_youtube_comments_with_progress(video_url, max_comments=50, session_id
         # Ejecutar scraping
         data = scraper.scrape_video_comments(video_url, max_comments)
         
-        print(f"✅ Scraping completado: {data.get('total_comments', 0) if data else 0} comentarios")
+        log_info(f"✅ Scraping completado: {data.get('total_comments', 0) if data else 0} comentarios")
         return data
         
     except Exception as e:
-        print(f"❌ Error en scraping con progreso: {e}")
+        log_info(f"❌ Error en scraping con progreso: {e}")
         # Enviar error por WebSocket si es posible
         if session_id:
             import threading
@@ -937,7 +937,7 @@ async def scrape_youtube_comments_async(video_url, max_comments=50, session_id=N
             session_id
         )
     except Exception as e:
-        print(f"❌ Error en scrape_youtube_comments_async: {e}")
+        log_info(f"❌ Error en scrape_youtube_comments_async: {e}")
         import traceback
         traceback.print_exc()
         return None

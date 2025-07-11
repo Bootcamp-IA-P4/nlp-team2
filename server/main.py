@@ -64,9 +64,57 @@ async def prediction_request(data: dict):
 
 @app.get("/"+setting.version+"/prediction_list")
 async def prediction_list():
-    return {
-        "prediction_list": database.get_request_list(),
-    }
+    """Endpoint mejorado que incluye información de toxicidad REAL"""
+    try:
+        requests_data = database.get_request_list()
+        
+        enriched_requests = []
+        for request_data in requests_data:
+            video_data = request_data.get('video', {})
+            
+            # 🎯 OBTENER DATOS DE TOXICIDAD REALES
+            toxicity_summary = database.get_toxicity_summary_by_request(request_data['id'])
+            
+            request_dict = {
+                "id": request_data['id'],
+                "fk_video_id": request_data['fk_video_id'],
+                "request_date": request_data['request_date'].isoformat() if request_data['request_date'] else None,
+                "created_at": request_data['request_date'].isoformat() if request_data['request_date'] else None,
+                
+                # Información del video
+                "video_title": video_data.get('title', "Sin título"),
+                "video_url": video_data.get('video_url', ""),
+                "video_author": video_data.get('author_name', "Desconocido"),
+                "video_description": video_data.get('description', ""),
+                
+                # Estadísticas básicas
+                "total_comments": video_data.get('total_comments', 0),
+                "total_replies": video_data.get('total_threads', 0),
+                "total_likes": video_data.get('total_likes', 0),
+                "total_emojis": video_data.get('total_emojis', 0),
+                
+                # 🎯 INFORMACIÓN DE TOXICIDAD REAL DE LA BD
+                "toxicity_rate": float(toxicity_summary.toxicity_rate) if toxicity_summary else 0.0,
+                "categories_summary": toxicity_summary.categories_summary if toxicity_summary else {},
+                "toxic_comments": toxicity_summary.toxic_comments if toxicity_summary else 0,
+                "average_toxicity": float(toxicity_summary.average_toxicity) if toxicity_summary else 0.0,
+                "analysis_completed": toxicity_summary.analysis_completed_at.isoformat() if toxicity_summary and toxicity_summary.analysis_completed_at else None,
+                "has_toxicity_analysis": toxicity_summary is not None
+            }
+            
+            enriched_requests.append(request_dict)
+        
+        return {
+            "prediction_list": enriched_requests,
+            "total_count": len(enriched_requests),
+            "has_toxicity_analysis": any(req.get("has_toxicity_analysis", False) for req in enriched_requests)
+        }
+        
+    except Exception as e:
+        logger.error(f"Error en prediction_list: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/"+setting.version+"/prediction_detail/{id}")
 async def prediction_detail(id: int):
@@ -124,11 +172,11 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
         # 1. Scraping con progreso
         await progress_manager.send_progress(session_id, 5, f"🎬 Iniciando análisis de video ({max_comments} comentarios)...")
         
-        # ✅ EJECUTAR TU SCRAPER DE scrp_socket.py EN UN EXECUTOR (NO BLOQUEA EL SERVIDOR)
+        # ✅ EJECUTAR TU SCRAPER
         loop = asyncio.get_event_loop()
         scrape_data = await loop.run_in_executor(
-            None,  # Usar executor por defecto
-            scrape_youtube_comments_with_progress,  # ✅ CAMBIAR A LA FUNCIÓN CORRECTA
+            None,
+            scrape_youtube_comments_with_progress,
             video_url,
             max_comments,
             session_id
@@ -145,17 +193,14 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
         
         logger.info(f"✅ Scraping exitoso: {scrape_data.get('total_comments', 0)} comentarios extraídos")
         
-        # 2. Análisis de toxicidad con ML usando TU pipeline
+        # 2. Análisis de toxicidad con ML
         await progress_manager.send_progress(session_id, 80, "🤖 Analizando toxicidad con IA...")
         
         try:
-            # ✅ USAR TU PIPELINE EXISTENTE
             from server.ml.pipeline import ToxicityPipeline
             pipeline = ToxicityPipeline()
             
             logger.info("🤖 Pipeline de toxicidad inicializado correctamente")
-            
-            # ✅ USAR TU MÉTODO analyze_youtube_comments
             analysis = pipeline.analyze_youtube_comments(scrape_data)
             
             if analysis is None:
@@ -168,12 +213,22 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
             # Crear análisis de fallback
             analysis = {
                 'total_comments': scrape_data.get('total_comments', 0),
+                'total_replies': 0,
+                'total_analyzed': scrape_data.get('total_comments', 0),
                 'toxic_comments': 0,
+                'toxic_replies': 0,
+                'total_toxic': 0,
                 'toxicity_rate': 0.0,
+                'main_comments_toxicity_rate': 0.0,
+                'replies_toxicity_rate': 0.0,
                 'analysis_results': [],
+                'main_comments_analysis': [],
+                'replies_analysis': [],
+                'enhanced_scraped_data': scrape_data,
                 'summary': {
                     'categories_found': {},
                     'most_toxic_comment': None,
+                    'most_toxic_reply': None,
                     'average_toxicity': 0.0,
                     'model_info': {
                         'model_type': 'Error - Fallback',
@@ -184,34 +239,82 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
                 }
             }
         
-        # 3. Intentar guardar en base de datos (NO BLOQUEAR si falla)
+        # 3. Guardar en base de datos (ACTUALIZADO)
         await progress_manager.send_progress(session_id, 95, "💾 Guardando resultados...")
         
         bd_success = False
+        toxicity_bd_success = False
+        request_id = None
+        video_id = None
+        
         try:
+            # 🎯 GUARDAR DATOS DE SCRAPING
             enhanced_data = analysis.get('enhanced_scraped_data', scrape_data)
             database.insert_video_from_scrapper(enhanced_data)
-            logger.info("✅ Datos guardados en base de datos")
+            logger.info("✅ Datos de scraping guardados en base de datos")
             bd_success = True
+            
+            # 🎯 OBTENER IDs PARA GUARDAR TOXICIDAD
+            # Buscar el request recién creado
+            video_id_from_data = enhanced_data.get('video_id')
+            if video_id_from_data:
+                # Obtener el video por youtube_video_id
+                session = database.open_session()
+                from server.database.models import Video, Request
+                
+                video = session.query(Video).filter_by(youtube_video_id=video_id_from_data).first()
+                if video:
+                    video_id = video.id
+                    # Obtener el request más reciente para este video
+                    latest_request = session.query(Request).filter_by(fk_video_id=video_id).order_by(Request.request_date.desc()).first()
+                    if latest_request:
+                        request_id = latest_request.id
+                
+                session.close()
+            
+            # 🎯 GUARDAR ANÁLISIS DE TOXICIDAD
+            if request_id and video_id and analysis.get('total_toxic', 0) >= 0:  # Guardar incluso si no hay toxicidad
+                toxicity_bd_success = database.save_toxicity_analysis(analysis, request_id, video_id)
+                if toxicity_bd_success:
+                    logger.info("✅ Análisis de toxicidad guardado en base de datos")
+                else:
+                    logger.warning("⚠️ Error guardando análisis de toxicidad")
+            else:
+                logger.warning(f"⚠️ No se pudo guardar toxicidad - request_id: {request_id}, video_id: {video_id}")
+                
         except Exception as e:
             logger.warning(f"⚠️ Error guardando en BD: {e}")
-            # NO fallar aquí, solo logear el error
+            import traceback
+            traceback.print_exc()
         
         await asyncio.sleep(1)
         
-        # 4. ✅ SIEMPRE ENVIAR RESULTADO AL FRONTEND (aunque falle la BD)
+        # 4. ✅ SIEMPRE ENVIAR RESULTADO AL FRONTEND
         result = {
             "video_url": video_url,
             "max_comments_requested": max_comments,
             "actual_comments_found": scrape_data.get('total_comments', 0),
             "actual_replies_found": scrape_data.get('total_threads', 0),
+            
+            # 🎯 ESTADÍSTICAS DETALLADAS
+            "total_analyzed": analysis.get('total_analyzed', 0),
+            "main_comments_analyzed": analysis.get('total_comments', 0),
+            "replies_analyzed": analysis.get('total_replies', 0),
+            "toxic_main_comments": analysis.get('toxic_comments', 0),
+            "toxic_replies": analysis.get('toxic_replies', 0),
+            "total_toxic": analysis.get('total_toxic', 0),
+            
             "scraping_data": scrape_data,
             "analysis": analysis,
-            "database_saved": bd_success  # ✅ Indicar si se guardó en BD
+            "database_saved": bd_success,
+            "toxicity_saved": toxicity_bd_success,  # 🎯 NUEVO
+            "request_id": request_id,  # 🎯 NUEVO
+            "video_id": video_id  # 🎯 NUEVO
         }
         
         logger.info(f"🎉 Análisis completado exitosamente para {video_url}")
-        logger.info(f"📊 Resultado: {analysis.get('total_comments', 0)} comentarios, {analysis.get('toxic_comments', 0)} tóxicos ({analysis.get('toxicity_rate', 0)*100:.1f}%)")
+        logger.info(f"📊 Resultado: {analysis.get('total_analyzed', 0)} textos analizados, {analysis.get('total_toxic', 0)} tóxicos ({analysis.get('toxicity_rate', 0)*100:.1f}%)")
+        logger.info(f"💾 BD: scraping={bd_success}, toxicidad={toxicity_bd_success}")
         
         # ✅ ENVIAR SIEMPRE AL FRONTEND
         await progress_manager.send_completion(session_id, True, result)

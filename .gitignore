@@ -61,3 +61,10 @@ checkpoints/
 *.txt
 *.xml
 *.xlsx
+
+# Coverage files
+.coverage
+.coveragerc
+htmlcov/
+.pytest_cache/
+/client/coverage/
