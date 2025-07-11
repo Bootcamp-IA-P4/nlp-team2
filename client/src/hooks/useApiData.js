@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8000';
+const TOXICITY_API = `${API_BASE_URL}/v1/toxicity`;
 
 // Hook para obtener lista de análisis/predicciones
 export const useAnalysisHistory = () => {
@@ -409,6 +410,41 @@ const generateToxicityTrends = (rawData) => {
   }
   
   return trends;
+};
+
+// ✅ NUEVAS FUNCIONES PARA ANÁLISIS DE TOXICIDAD
+export const analyzeSingleComment = async (comment) => {
+  try {
+    const response = await axios.post(`${TOXICITY_API}/analyze-comment`, {
+      comment: comment
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error analizando comentario:', error);
+    throw error;
+  }
+};
+
+export const analyzeMultipleComments = async (comments) => {
+  try {
+    const response = await axios.post(`${TOXICITY_API}/analyze-comments`, {
+      comments: comments
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error analizando comentarios:', error);
+    throw error;
+  }
+};
+
+export const checkToxicityHealth = async () => {
+  try {
+    const response = await axios.get(`${TOXICITY_API}/health`);
+    return response.data;
+  } catch (error) {
+    console.error('Error verificando salud del sistema:', error);
+    throw error;
+  }
 };
 
 export default { useAnalysisHistory, useAnalysisDetail, useDashboardStats };

@@ -4,15 +4,11 @@ from pydantic import BaseModel
 import logging
 import uuid
 import asyncio
-
-# Importar módulos existentes
 import server.database.db_manager as database
 import server.scraper.scrp as scrp
 from server.core.config import setting
 from server.scraper.progress_manager import progress_manager
 from server.scraper.scrp_socket import scrape_youtube_comments_with_progress  # ✅ Usar versión síncrona con WebSocket
-
-# Importar las rutas de toxicidad
 from server.ml.api.toxicity_routes import router as toxicity_router
 
 # Configurar logging
