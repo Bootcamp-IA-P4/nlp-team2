@@ -4,24 +4,20 @@ import torch
 import numpy as np
 from typing import List, Dict, Any, Optional
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import logging
+
 from datetime import datetime
+from server.core.print_dev import log_info, log_error, log_warning, log_debug
+
+# Importar funciones optimizadas para carga de modelo
+from server.ml.api import get_model_efficiently, suppress_torch_numpy_warnings
+
 
 class ToxicityPredictor:
     """Predictor de toxicidad optimizado para producción"""
     
-    def __init__(self, model_path: Optional[str] = None):
-        self.logger = logging.getLogger(__name__)
-        
-        # Configurar rutas - CAMBIAR models por model
-        if model_path is None:
-            model_path = os.path.join(os.path.dirname(__file__), "model", "distilbert_model.pkl")
-        
-        self.model_path = model_path
-        self.metrics_path = os.path.join(os.path.dirname(model_path), "metrics.pkl")
-        
-        print(f"🔍 Buscando modelo en: {self.model_path}")
-        print(f"🔍 ¿Existe el archivo? {os.path.exists(self.model_path)}")
+    def __init__(self):
+        # Configurar rutas para las métricas
+        self.metrics_path = os.path.join(os.path.dirname(__file__), "model", "metrics.pkl")
         
         # Cargar modelo
         self._load_model()
@@ -32,10 +28,14 @@ class ToxicityPredictor:
             self.model.to(self.device)
             self.model.eval()
         
-        self.logger.info(f"ToxicityPredictor inicializado en {self.device}")
+        log_info(f"ToxicityPredictor inicializado en {self.device}")
     
     def _load_model(self):
-        """Cargar modelo y tokenizer"""
+        """
+        Cargar modelo y tokenizer directamente en memoria.
+        No requiere archivos locales ya que utiliza get_model_efficiently
+        para unir y deserializar el modelo directamente en memoria.
+        """
         try:
             # Cargar métricas
             if os.path.exists(self.metrics_path):
@@ -43,35 +43,52 @@ class ToxicityPredictor:
                     self.model_metrics = pickle.load(f)
             else:
                 self.model_metrics = {}
+                log_warning(f"No se encontraron métricas en: {self.metrics_path}")
             
             # Cargar modelo
-            if os.path.exists(self.model_path):
-                with open(self.model_path, 'rb') as f:
-                    model_data = pickle.load(f)
-                
-                # Extraer componentes según el tipo de datos
-                if hasattr(model_data, 'model'):
-                    self.model = model_data.model
-                    self.tokenizer = model_data.tokenizer
-                elif isinstance(model_data, dict):
-                    self.model = model_data.get('model')
-                    self.tokenizer = model_data.get('tokenizer')
-                else:
-                    self.model = model_data
-                    self.tokenizer = AutoTokenizer.from_pretrained('distilbert-base-uncased')
-                
-                self.logger.info("Modelo cargado desde archivo local")
-            else:
-                # Fallback: modelo base
+            # Siempre intenta cargar el modelo unificado en memoria
+            # Intentar cargar el modelo eficientemente desde memoria compartida o caché
+            try:
+                log_info("Intentando cargar el modelo eficientemente desde memoria...")
+                # Usar el contexto para suprimir advertencias durante la carga
+                with suppress_torch_numpy_warnings():
+                    # get_model_efficiently ya devuelve el modelo deserializado, no bytes
+                    model_data = get_model_efficiently()
+                log_info(f"Modelo cargado eficientemente: {type(model_data)}")
+            except Exception as e:
+                log_warning(f"No se pudo cargar el modelo eficientemente: {e}")
+                log_warning("Utilizando modelo base como fallback")
                 self._load_base_model()
+                return
+
+            # Extraer componentes según el tipo de datos
+            if model_data is None:
+                raise ValueError("El modelo cargado es None")
+                
+            if hasattr(model_data, 'model'):
+                self.model = model_data.model
+                self.tokenizer = model_data.tokenizer
+                log_info("Modelo cargado desde objeto con atributos 'model' y 'tokenizer'")
+            elif isinstance(model_data, dict):
+                self.model = model_data.get('model')
+                self.tokenizer = model_data.get('tokenizer')
+                log_info("Modelo cargado desde diccionario con claves 'model' y 'tokenizer'")
+            else:
+                self.model = model_data
+                log_info("Cargando tokenizer desde pretrained...")
+                self.tokenizer = AutoTokenizer.from_pretrained('distilbert-base-uncased')
+                log_info("Tokenizer cargado desde pretrained")
+            
+            log_info(f"Modelo cargado correctamente. Tipo: {type(self.model)}")
                 
         except Exception as e:
-            self.logger.error(f"Error cargando modelo: {e}")
+            log_error(f"Error cargando modelo: {e}")
+            log_error(f"Detalles del error: {str(e)}")
             self._load_base_model()
     
     def _load_base_model(self):
         """Cargar modelo base como fallback"""
-        self.logger.warning("Cargando modelo base DistilBERT")
+        log_warning("Cargando modelo base DistilBERT")
         
         self.tokenizer = AutoTokenizer.from_pretrained('distilbert-base-uncased')
         self.model = AutoModelForSequenceClassification.from_pretrained(
@@ -144,7 +161,7 @@ class ToxicityPredictor:
                 result = self.predict_single(text)
                 results.append(result)
             except Exception as e:
-                self.logger.error(f"Error procesando texto: {e}")
+                log_error(f"Error procesando texto: {e}")
                 results.append({
                     'text': text,
                     'is_toxic': False,

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import logging
 import uuid
 import asyncio
+import uvicorn
 
 # Importar módulos existentes
 import server.database.db_manager as database
@@ -325,6 +326,7 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
         traceback.print_exc()
         await progress_manager.send_completion(session_id, False, error=str(e))
 
+
 if __name__ == "__main__":
-    import uvicorn
+    #import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
