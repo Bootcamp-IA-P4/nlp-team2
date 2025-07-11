@@ -1,7 +1,7 @@
 # Sistema de Tests - NLP Team 2
 
 Este README describe exclusivamente el sistema de testing del proyecto: cómo funciona, cómo ejecutarlo y cómo interpretar los resultados.
-Este conjunto de tests esta desarrollado con Copilot integramente utilizando 'Ingeniería de Pronts'.
+Este conjunto de tests esta desarrollado con Copilot integramente utilizando 'Ingeniería de Prompts'.
 
 ## 📋 Tabla de Contenidos
 
