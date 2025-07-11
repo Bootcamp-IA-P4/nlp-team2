@@ -1,0 +1,66 @@
+{
+  "archivo_original": "modelo_original.pkl",
+  "hash_original": "0bfdbf59c3d3c2201255bea7256e5c233301f6c6dc362b5af7bb22726e4d35d8",
+  "tama\u00f1o_original": 268372991,
+  "tama\u00f1o_chunk": 26214400,
+  "num_partes": 11,
+  "partes": [
+    {
+      "archivo": "partes_modelo/parte_001.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 1
+    },
+    {
+      "archivo": "partes_modelo/parte_002.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 2
+    },
+    {
+      "archivo": "partes_modelo/parte_003.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 3
+    },
+    {
+      "archivo": "partes_modelo/parte_004.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 4
+    },
+    {
+      "archivo": "partes_modelo/parte_005.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 5
+    },
+    {
+      "archivo": "partes_modelo/parte_006.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 6
+    },
+    {
+      "archivo": "partes_modelo/parte_007.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 7
+    },
+    {
+      "archivo": "partes_modelo/parte_008.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 8
+    },
+    {
+      "archivo": "partes_modelo/parte_009.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 9
+    },
+    {
+      "archivo": "partes_modelo/parte_010.bin",
+      "tama\u00f1o": 26214400,
+      "numero": 10
+    },
+    {
+      "archivo": "partes_modelo/parte_011.bin",
+      "tama\u00f1o": 6228991,
+      "numero": 11
+    }
+  ],
+  "creado_en": "/Volumes/Externo/Proyectos/segundo_ejemplo",
+  "version": "1.0"
+}
