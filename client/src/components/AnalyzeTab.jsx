@@ -3,6 +3,7 @@ import AppMetadata from './AppMetadata';
 import { Play, AlertTriangle, MessageCircle, TrendingUp, Clock, Send, Video, CheckCircle, XCircle, BarChart3, Settings } from 'lucide-react';
 import axios from 'axios';
 import ProgressLoader from './ProgressLoader';
+import { API_BASE_URL } from '../config';
 
 const AnalyzeTab = () => {
   const [youtubeUrl, setYoutubeUrl] = useState('');
