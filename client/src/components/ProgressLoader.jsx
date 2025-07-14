@@ -106,42 +106,52 @@ const ProgressLoader = ({ sessionId, onComplete, onError, maxComments }) => {
   return (
     <div className="card">
       <div className="space-y-6">
-        {/* Header con GIF */}
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            {status === 'processing' || status === 'connected' ? (
+        {/* ✅ GIF CENTRADO CON ASPECT RATIO WIDESCREEN */}
+        {status === 'processing' || status === 'connected' ? (
+          <div className="flex flex-col items-center text-center space-y-4">
+            {/* GIF en formato widescreen centrado */}
+            <div className="w-full max-w-2xl mx-auto">
               <img 
                 src="/img/gifgodzilla.gif" 
-                alt="Cargando..." 
-                className="h-96 w-96 rounded-lg object-cover"
+                alt="Analizando..." 
+                className="w-full h-48 md:h-56 lg:h-64 rounded-lg object-cover object-center"
+                style={{ aspectRatio: '16/9' }}
               />
-            ) : (
-              <div className="h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
-                {getStatusIcon()}
+            </div>
+            
+            {/* ✅ TÍTULO Y PORCENTAJE JUNTOS Y CENTRADOS */}
+            <div className="text-center space-y-2">
+              <h3 className="text-xl md:text-2xl font-bold text-navy-800 dark:text-cream-100">
+                Análisis en Progreso
+              </h3>
+              <div className="text-4xl md:text-5xl font-bold text-accent-600 dark:text-accent-400">
+                {Math.round(progress)}%
               </div>
-            )}
-          </div>
-          
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-navy-800 dark:text-cream-100">
-              Análisis en Progreso
-            </h3>
-            <p className="text-sm text-navy-600 dark:text-cream-300">
-              {maxComments ? `Analizando hasta ${maxComments} comentarios` : 'Procesando solicitud...'}
-            </p>
-          </div>
-          
-          <div className="text-right">
-            <div className="text-3xl font-bold text-navy-800 dark:text-cream-100">
-              {Math.round(progress)}%
-            </div>
-            <div className="text-xs text-navy-500 dark:text-cream-400">
-              Completado
+              <p className="text-sm text-navy-600 dark:text-cream-300">
+                {maxComments ? `Analizando hasta ${maxComments} comentarios` : 'Procesando solicitud...'}
+              </p>
             </div>
           </div>
-        </div>
+        ) : (
+          // Para otros estados (connecting, completed, error)
+          <div className="flex items-center justify-center space-x-4">
+            <div className="h-16 w-16 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg">
+              {getStatusIcon()}
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-navy-800 dark:text-cream-100">
+                {status === 'connecting' ? 'Conectando...' :
+                 status === 'completed' ? 'Análisis Completado' :
+                 status === 'error' ? 'Error en el Análisis' : 'Procesando...'}
+              </h3>
+              <div className="text-2xl font-bold text-accent-600 dark:text-accent-400">
+                {Math.round(progress)}%
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* Barra de progreso MEJORADA */}
+        {/* ✅ BARRA DE PROGRESO MEJORADA */}
         <div className="space-y-3">
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
             <div 
@@ -153,18 +163,15 @@ const ProgressLoader = ({ sessionId, onComplete, onError, maxComments }) => {
             />
           </div>
           
-          {/* Mensaje de estado con más detalle */}
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-navy-700 dark:text-cream-200 font-medium flex-1">
+          {/* ✅ MENSAJE DE ESTADO CENTRADO */}
+          <div className="text-center">
+            <span className="text-navy-700 dark:text-cream-200 font-medium">
               {message}
-            </span>
-            <span className="text-navy-500 dark:text-cream-400 text-xs">
-              ID: {sessionId?.substring(0, 8)}...
             </span>
           </div>
         </div>
 
-        {/* Información detallada */}
+        {/* ✅ INFORMACIÓN DETALLADA - SIN DEBUG INFO */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-600">
           <div className="text-center">
             <div className="text-sm font-medium text-navy-700 dark:text-cream-300">Estado</div>

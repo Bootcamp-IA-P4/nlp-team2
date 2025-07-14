@@ -410,4 +410,39 @@ const generateToxicityTrends = (rawData) => {
   return trends;
 };
 
+// ✅ NUEVAS FUNCIONES PARA ANÁLISIS DE TOXICIDAD
+export const analyzeSingleComment = async (comment) => {
+  try {
+    const response = await axios.post(`${TOXICITY_API}/analyze-comment`, {
+      comment: comment
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error analizando comentario:', error);
+    throw error;
+  }
+};
+
+export const analyzeMultipleComments = async (comments) => {
+  try {
+    const response = await axios.post(`${TOXICITY_API}/analyze-comments`, {
+      comments: comments
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error analizando comentarios:', error);
+    throw error;
+  }
+};
+
+export const checkToxicityHealth = async () => {
+  try {
+    const response = await axios.get(`${TOXICITY_API}/health`);
+    return response.data;
+  } catch (error) {
+    console.error('Error verificando salud del sistema:', error);
+    throw error;
+  }
+};
+
 export default { useAnalysisHistory, useAnalysisDetail, useDashboardStats };

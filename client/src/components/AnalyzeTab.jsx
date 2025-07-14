@@ -3,7 +3,6 @@ import AppMetadata from './AppMetadata';
 import { Play, AlertTriangle, MessageCircle, TrendingUp, Clock, Send, Video, CheckCircle, XCircle, BarChart3, Settings } from 'lucide-react';
 import axios from 'axios';
 import ProgressLoader from './ProgressLoader';
-import { API_BASE_URL } from '../config';
 
 const AnalyzeTab = () => {
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -128,13 +127,11 @@ const AnalyzeTab = () => {
     setError('');
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/v1/toxicity/analyze-comment`, {
-        comment: comment
-      });
-
+      const response = await analyzeSingleComment(comment);
+      
       setAnalysisResult({ 
         success: true, 
-        single_comment: response.data.result 
+        single_comment: response.result 
       });
     } catch (err) {
       setError(err.response?.data?.detail || 'Error analizando el comentario');
@@ -165,7 +162,7 @@ const AnalyzeTab = () => {
           </div>
         </div>
 
-        {/* Análisis de Video YouTube - ACTUALIZADO */}
+        {/* Análisis de Video YouTube - SIMPLIFICADO */}
         <div className="card">
           <div className="flex items-center space-x-3 mb-4">
             <Video className="h-6 w-6 text-secondary-500 dark:text-secondary-400" />
@@ -173,7 +170,7 @@ const AnalyzeTab = () => {
           </div>
           
           <div className="space-y-4">
-            {/* Input URL */}
+            {/* Input URL con botón de configurar */}
             <div className="flex flex-col md:flex-row md:items-end space-y-4 md:space-y-0 md:space-x-4">
               <div className="flex-1">
                 <label className="block text-sm font-medium text-navy-700 dark:text-cream-300 mb-2">
@@ -189,136 +186,197 @@ const AnalyzeTab = () => {
                 />
               </div>
               
-              {/* ✅ NUEVO: Selector de número de comentarios */}
-              <div className="md:w-48">
-                <label className="block text-sm font-medium text-navy-700 dark:text-cream-300 mb-2">
-                  Comentarios a analizar
-                </label>
-                <div className="flex space-x-2">
-                  <input
-                    type="number"
-                    value={maxComments}
-                    onChange={(e) => handleMaxCommentsChange(e.target.value)}
-                    min={MIN_COMMENTS}
-                    max={MAX_COMMENTS}
-                    className="input-primary w-20 text-center"
-                    disabled={isAnalyzing}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                    className="p-2 text-navy-500 hover:text-navy-700 dark:text-cream-300 dark:hover:text-cream-100 hover:bg-cream-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                    disabled={isAnalyzing}
-                  >
-                    <Settings className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
+              {/* ✅ NUEVO: Botón simple de configurar */}
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="btn-secondary flex items-center space-x-2 px-4 py-2"
+                  disabled={isAnalyzing}
+                >
+                  <Settings className="h-4 w-4" />
+                  <span>Configurar</span>
+                </button>
 
-              <button
-                onClick={handleAnalyzeVideo}
-                disabled={isAnalyzing || !youtubeUrl.trim() || !validateCommentsNumber(maxComments)}
-                className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <Clock className="h-4 w-4 animate-spin" />
-                    <span>Iniciando...</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4" />
-                    <span>Analizar Video</span>
-                  </>
-                )}
-              </button>
+                <button
+                  onClick={handleAnalyzeVideo}
+                  disabled={isAnalyzing || !youtubeUrl.trim() || !validateCommentsNumber(maxComments)}
+                  className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <Clock className="h-4 w-4 animate-spin" />
+                      <span>Iniciando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4" />
+                      <span>Analizar Video</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* ✅ NUEVO: Panel de configuración avanzada */}
+            {/* ✅ LEYENDA SIMPLE ABAJO */}
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              <span>Por defecto se analizan </span>
+              <strong className="text-navy-700 dark:text-cream-200">{maxComments} comentarios</strong>
+              <span> • Tiempo estimado: </span>
+              <strong className="text-navy-700 dark:text-cream-200">
+                {maxComments <= 50 ? '1-2 minutos' : 
+                 maxComments <= 200 ? '2-4 minutos' : 
+                 maxComments <= 500 ? '4-7 minutos' : '7-12 minutos'}
+              </strong>
+            </div>
+
+            {/* ✅ PANEL DE CONFIGURACIÓN MEJORADO (solo se muestra al hacer clic) */}
             {showAdvanced && (
-              <div className="p-4 bg-cream-50 dark:bg-gray-700/50 rounded-lg border border-cream-200 dark:border-gray-600">
-                <div className="flex items-center space-x-2 mb-3">
-                  <Settings className="h-4 w-4 text-navy-600 dark:text-cream-400" />
-                  <h4 className="text-sm font-medium text-navy-700 dark:text-cream-300">Configuración Avanzada</h4>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 transition-all duration-200">
+                <div className="flex items-center space-x-2 mb-4">
+                  <Settings className="h-5 w-5 text-navy-600 dark:text-cream-400" />
+                  <h4 className="text-base font-medium text-navy-700 dark:text-cream-300">Configuración de Análisis</h4>
                 </div>
                 
-                {/* Botones rápidos */}
-                <div className="space-y-3">
+                <div className="space-y-4">
+                  {/* Selector de número de comentarios mejorado */}
                   <div>
-                    <p className="text-xs text-navy-600 dark:text-cream-400 mb-2">Presets recomendados:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {RECOMMENDED_COMMENTS.map((preset) => (
-                        <button
-                          key={preset}
-                          onClick={() => setMaxComments(preset)}
+                    <label className="block text-sm font-medium text-navy-700 dark:text-cream-300 mb-3">
+                      Número de comentarios a analizar
+                    </label>
+                    
+                    {/* Slider visual */}
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-4">
+                        <input
+                          type="range"
+                          min={MIN_COMMENTS}
+                          max={MAX_COMMENTS}
+                          value={maxComments}
+                          onChange={(e) => setMaxComments(parseInt(e.target.value))}
+                          className="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
                           disabled={isAnalyzing}
-                          className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                            maxComments === preset
-                              ? 'bg-accent-500 text-white'
-                              : 'bg-cream-200 dark:bg-gray-600 text-navy-700 dark:text-cream-300 hover:bg-cream-300 dark:hover:bg-gray-500'
-                          }`}
-                        >
-                          {preset}
-                        </button>
-                      ))}
+                        />
+                        <div className="w-20">
+                          <input
+                            type="number"
+                            value={maxComments}
+                            onChange={(e) => handleMaxCommentsChange(e.target.value)}
+                            min={MIN_COMMENTS}
+                            max={MAX_COMMENTS}
+                            className="w-full px-3 py-1 text-center border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+                            disabled={isAnalyzing}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Presets recomendados */}
+                      <div>
+                        <p className="text-xs text-navy-600 dark:text-cream-400 mb-2">Presets recomendados:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {RECOMMENDED_COMMENTS.map((preset) => (
+                            <button
+                              key={preset}
+                              onClick={() => setMaxComments(preset)}
+                              disabled={isAnalyzing}
+                              className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                                maxComments === preset
+                                  ? 'bg-accent-500 text-white'
+                                  : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500'
+                              }`}
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Información y validación */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <div className="p-2 bg-white dark:bg-gray-800 rounded border">
-                      <p className="text-navy-500 dark:text-cream-500">Mínimo:</p>
-                      <p className="font-medium text-navy-800 dark:text-cream-200">{MIN_COMMENTS} comentarios</p>
+                  {/* Información visual de límites */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Mínimo</span>
+                      </div>
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mt-1">
+                        {MIN_COMMENTS} comentarios
+                      </p>
                     </div>
-                    <div className="p-2 bg-white dark:bg-gray-800 rounded border">
-                      <p className="text-navy-500 dark:text-cream-500">Máximo:</p>
-                      <p className="font-medium text-navy-800 dark:text-cream-200">{MAX_COMMENTS} comentarios</p>
+                    
+                    <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Actual</span>
+                      </div>
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mt-1">
+                        {maxComments} comentarios
+                      </p>
                     </div>
-                    <div className="p-2 bg-white dark:bg-gray-800 rounded border">
-                      <p className="text-navy-500 dark:text-cream-500">Tiempo estimado:</p>
-                      <p className="font-medium text-navy-800 dark:text-cream-200">
-                        {maxComments <= 50 ? '1-2 min' : 
-                         maxComments <= 200 ? '2-4 min' : 
-                         maxComments <= 500 ? '4-7 min' : '7-12 min'}
+                    
+                    <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Máximo</span>
+                      </div>
+                      <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mt-1">
+                        {MAX_COMMENTS} comentarios
                       </p>
                     </div>
                   </div>
 
-                  {/* Indicador de validación */}
+                  {/* Estimación de tiempo mejorada */}
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                        Tiempo estimado de análisis
+                      </span>
+                    </div>
+                    <p className="text-lg font-bold text-blue-900 dark:text-blue-100">
+                      {maxComments <= 50 ? '1-2 minutos' : 
+                       maxComments <= 200 ? '2-4 minutos' : 
+                       maxComments <= 500 ? '4-7 minutos' : '7-12 minutos'}
+                    </p>
+                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                      {maxComments <= 100 ? '⚡ Análisis rápido' : 
+                       maxComments <= 500 ? '⏱️ Análisis moderado' : '🕐 Análisis extenso'}
+                    </p>
+                  </div>
+
+                  {/* Validación visual */}
                   <div className="flex items-center space-x-2">
                     {validateCommentsNumber(maxComments) ? (
                       <>
                         <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-xs text-green-600 dark:text-green-400">
+                        <span className="text-sm text-green-600 dark:text-green-400 font-medium">
                           Configuración válida
                         </span>
                       </>
                     ) : (
                       <>
                         <XCircle className="h-4 w-4 text-red-500" />
-                        <span className="text-xs text-red-600 dark:text-red-400">
+                        <span className="text-sm text-red-600 dark:text-red-400 font-medium">
                           Número debe estar entre {MIN_COMMENTS} y {MAX_COMMENTS}
                         </span>
                       </>
                     )}
                   </div>
+
+                  {/* Botón para cerrar configuración */}
+                  <div className="flex justify-end pt-3 border-t border-gray-200 dark:border-gray-600">
+                    <button
+                      onClick={() => setShowAdvanced(false)}
+                      className="btn-secondary text-sm px-4 py-2"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Listo
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
-
-            {/* Información básica siempre visible */}
-            <div className="flex items-center justify-between text-xs text-navy-600 dark:text-cream-400">
-              <span>
-                Se analizarán hasta <strong>{maxComments}</strong> comentarios
-              </span>
-              <span>
-                Tiempo estimado: <strong>
-                  {maxComments <= 50 ? '1-2 minutos' : 
-                   maxComments <= 200 ? '2-4 minutos' : 
-                   maxComments <= 500 ? '4-7 minutos' : '7-12 minutos'}
-                </strong>
-              </span>
-            </div>
           </div>
         </div>
 
@@ -489,34 +547,34 @@ const AnalyzeTab = () => {
                   </div>
                 </div>
 
-                {/* Estadísticas separadas */}
+                {/* Estadísticas separadas - MEJORADO PARA MODO OSCURO */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="metric-card">
-                    <h4 className="text-sm font-medium text-gray-600">Comentarios Principales</h4>
-                    <p className="text-2xl font-bold text-primary-500">
+                  <div className="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Comentarios Principales</h4>
+                    <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 mb-1">
                       {analysisResult.analysis.total_comments}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {analysisResult.analysis.toxic_comments} tóxicos ({(analysisResult.analysis.main_comments_toxicity_rate * 100).toFixed(1)}%)
                     </p>
                   </div>
                   
-                  <div className="metric-card">
-                    <h4 className="text-sm font-medium text-gray-600">Respuestas</h4>
-                    <p className="text-2xl font-bold text-accent-500">
+                  <div className="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Respuestas</h4>
+                    <p className="text-2xl font-bold text-accent-600 dark:text-accent-400 mb-1">
                       {analysisResult.analysis.total_replies}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {analysisResult.analysis.toxic_replies} tóxicas ({(analysisResult.analysis.replies_toxicity_rate * 100).toFixed(1)}%)
                     </p>
                   </div>
                   
-                  <div className="metric-card">
-                    <h4 className="text-sm font-medium text-gray-600">Total Analizado</h4>
-                    <p className="text-2xl font-bold text-secondary-500">
+                  <div className="card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Total Analizado</h4>
+                    <p className="text-2xl font-bold text-secondary-600 dark:text-secondary-400 mb-1">
                       {analysisResult.analysis.total_analyzed}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {analysisResult.analysis.total_toxic} tóxicos ({(analysisResult.analysis.toxicity_rate * 100).toFixed(1)}%)
                     </p>
                   </div>
@@ -576,6 +634,195 @@ const AnalyzeTab = () => {
                         )}
                       </div>
                     </div>
+                  </div>
+                )}
+
+                {/* NUEVA SECCIÓN: TODOS LOS COMENTARIOS TÓXICOS DETECTADOS */}
+                {(analysisResult.analysis.main_comments_analysis || analysisResult.analysis.replies_analysis) && (
+                  <div className="card">
+                    <div className="flex items-center space-x-3 mb-6">
+                      <AlertTriangle className="h-6 w-6 text-red-500" />
+                      <h4 className="section-title">Comentarios y Respuestas Tóxicos Detectados</h4>
+                    </div>
+                    
+                    {(() => {
+                      // Combinar comentarios principales y respuestas tóxicos
+                      const toxicMainComments = (analysisResult.analysis.main_comments_analysis || [])
+                        .filter(comment => comment.is_toxic)
+                        .map(comment => ({ ...comment, type: 'main_comment' }));
+                      
+                      const toxicReplies = (analysisResult.analysis.replies_analysis || [])
+                        .filter(reply => reply.is_toxic)
+                        .map(reply => ({ ...reply, type: 'reply' }));
+                      
+                      const allToxicComments = [...toxicMainComments, ...toxicReplies]
+                        .sort((a, b) => b.toxicity_confidence - a.toxicity_confidence); // Ordenar por nivel de toxicidad
+                      
+                      if (allToxicComments.length === 0) {
+                        return (
+                          <div className="text-center py-8">
+                            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
+                            <p className="text-lg font-medium text-green-600 dark:text-green-400">
+                              ¡Excelente! No se detectaron comentarios tóxicos
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              Todos los comentarios analizados son seguros
+                            </p>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              Se encontraron <strong>{allToxicComments.length}</strong> comentarios/respuestas tóxicos
+                            </p>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              Ordenados por nivel de toxicidad (mayor a menor)
+                            </div>
+                          </div>
+                          
+                          {/* LISTA DE COMENTARIOS TÓXICOS */}
+                          <div className="space-y-3 max-h-96 overflow-y-auto">
+                            {allToxicComments.map((toxicItem, index) => (
+                              <div 
+                                key={index}
+                                className="p-4 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 rounded-lg"
+                              >
+                                {/* HEADER CON TIPO Y NIVEL DE TOXICIDAD */}
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center space-x-2">
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      toxicItem.type === 'main_comment' 
+                                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300'
+                                        : 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300'
+                                    }`}>
+                                      {toxicItem.type === 'main_comment' ? '💬 Comentario Principal' : '↳ Respuesta'}
+                                    </span>
+                                    
+                                    {/* NIVEL DE TOXICIDAD */}
+                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                      toxicItem.toxicity_confidence >= 0.8 
+                                        ? 'bg-red-600 text-white' 
+                                        : toxicItem.toxicity_confidence >= 0.6 
+                                        ? 'bg-orange-500 text-white' 
+                                        : 'bg-yellow-500 text-black'
+                                    }`}>
+                                      {(toxicItem.toxicity_confidence * 100).toFixed(1)}% Tóxico
+                                    </span>
+                                  </div>
+                                  
+                                  {/* AUTOR SI ESTÁ DISPONIBLE */}
+                                  {toxicItem.metadata?.author && (
+                                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                                      Por: <span className="font-medium">{toxicItem.metadata.author}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* TEXTO DEL COMENTARIO */}
+                                <div className="mb-3">
+                                  <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">
+                                    "{toxicItem.text_analyzed || toxicItem.text || 'Texto no disponible'}"
+                                  </p>
+                                </div>
+                                
+                                {/* CATEGORÍAS DETECTADAS */}
+                                {toxicItem.categories_detected && toxicItem.categories_detected.length > 0 && (
+                                  <div className="mb-3">
+                                    <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-2">
+                                      Categorías detectadas:
+                                    </p>
+                                    <div className="flex flex-wrap gap-1">
+                                      {toxicItem.categories_detected.map((category, catIndex) => (
+                                        <span 
+                                          key={catIndex}
+                                          className="px-2 py-1 bg-red-200 dark:bg-red-800/50 text-red-800 dark:text-red-200 rounded text-xs font-medium"
+                                        >
+                                          {category}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* SCORES POR CATEGORÍA SI ESTÁN DISPONIBLES */}
+                                {toxicItem.category_scores && Object.keys(toxicItem.category_scores).length > 0 && (
+                                  <div className="border-t border-red-300 dark:border-red-700 pt-2 mt-2">
+                                    <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-2">
+                                      Puntuaciones detalladas:
+                                    </p>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                                      {Object.entries(toxicItem.category_scores).map(([category, score]) => (
+                                        <div key={category} className="flex justify-between">
+                                          <span className="text-gray-700 dark:text-gray-300">{category}:</span>
+                                          <span className="font-medium text-red-600 dark:text-red-400">
+                                            {(score * 100).toFixed(1)}%
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* INFORMACIÓN ADICIONAL */}
+                                <div className="flex items-center justify-between mt-3 pt-2 border-t border-red-300 dark:border-red-700">
+                                  <div className="text-xs text-gray-600 dark:text-gray-400">
+                                    Posición #{index + 1} por toxicidad
+                                  </div>
+                                  
+                                  {/* LIKES SI ESTÁN DISPONIBLES */}
+                                  {toxicItem.metadata?.likes !== undefined && (
+                                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                                      👍 {toxicItem.metadata.likes} likes
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* RESUMEN AL FINAL */}
+                          <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                              <div className="text-center">
+                                <div className="font-medium text-red-600 dark:text-red-400">
+                                  {toxicMainComments.length}
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  Comentarios Tóxicos
+                                </div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-medium text-purple-600 dark:text-purple-400">
+                                  {toxicReplies.length}
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  Respuestas Tóxicas
+                                </div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-medium text-orange-600 dark:text-orange-400">
+                                  {allToxicComments.filter(item => item.toxicity_confidence >= 0.8).length}
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  Altamente Tóxicos
+                                </div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-medium text-yellow-600 dark:text-yellow-400">
+                                  {(allToxicComments.reduce((sum, item) => sum + item.toxicity_confidence, 0) / allToxicComments.length * 100).toFixed(1)}%
+                                </div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400">
+                                  Promedio Toxicidad
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
