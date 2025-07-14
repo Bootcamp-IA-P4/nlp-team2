@@ -6,10 +6,10 @@ from typing import List, Dict, Any, Optional
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 from datetime import datetime
-from server.core.print_dev import log_info, log_error, log_warning, log_debug
+from core.print_dev import log_info, log_error, log_warning, log_debug
 
 # Importar funciones optimizadas para carga de modelo
-from server.ml.api import get_model_efficiently, suppress_torch_numpy_warnings
+from ml.api import get_model_efficiently, suppress_torch_numpy_warnings
 
 
 class ToxicityPredictor:

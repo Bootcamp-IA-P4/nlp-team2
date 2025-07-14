@@ -1,6 +1,9 @@
 import { BarChart3, History, BookOpen, Shield, PieChart } from 'lucide-react';
+import { useAppInfo } from '../hooks/useAppInfo';
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
+  const appInfo = useAppInfo();
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: PieChart },
     { id: 'analyze', label: 'Analizar', icon: BarChart3 },
@@ -56,8 +59,14 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       {/* Footer */}
       <div className="absolute bottom-0 w-64 p-4 border-t border-primary-600 dark:border-gray-700">
         <div className="text-xs text-primary-200 dark:text-gray-400">
-          <p>© 2025 Modzilla</p>
+          <p>© 2025 <strong>{appInfo.title}</strong></p>
           <p>Proyecto con carácter educativo</p>
+          {appInfo && !appInfo.isLoading && (
+            <>
+              <p>Versión: {appInfo.version}</p>
+              <p>Team: {appInfo.authors}</p>
+            </>
+          )}
         </div>
       </div>
     </div>

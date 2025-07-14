@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 import emoji
 from collections import Counter
 import json
-from server.core.print_dev import log_info, log_error, log_warning, log_debug
+from core.print_dev import log_info, log_error, log_warning, log_debug
 
 class YouTubeCommentScraperChrome:
     def __init__(self, headless=True):

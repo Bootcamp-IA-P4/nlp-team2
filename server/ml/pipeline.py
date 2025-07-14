@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from server.ml.predictor import ToxicityPredictor
+from ml.predictor import ToxicityPredictor
 import logging
 
 class ToxicityPipeline:

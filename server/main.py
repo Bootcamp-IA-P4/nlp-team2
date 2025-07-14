@@ -7,14 +7,14 @@ import asyncio
 import uvicorn
 
 # Importar módulos existentes
-import server.database.db_manager as database
-import server.scraper.scrp as scrp
-from server.core.config import setting
-from server.scraper.progress_manager import progress_manager
-from server.scraper.scrp_socket import scrape_youtube_comments_with_progress  # ✅ Usar versión síncrona con WebSocket
+import database.db_manager as database
+import scraper.scrp as scrp
+from core.config import setting
+from scraper.progress_manager import progress_manager
+from scraper.scrp_socket import scrape_youtube_comments_with_progress  # ✅ Usar versión síncrona con WebSocket
 
 # Importar las rutas de toxicidad
-from server.ml.api.toxicity_routes import router as toxicity_router
+from ml.api.toxicity_routes import router as toxicity_router
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -26,12 +26,20 @@ app = FastAPI(
     description=setting.description
 )
 
-# Configurar CORS
+# Configurar CORS - Permitir múltiples orígenes para desarrollo y producción
+allowed_origins = [
+    "http://localhost:3000",      # React dev server
+    "http://localhost:5173",      # Vite dev server  
+    "https://nlp-client-x3pc.onrender.com",  # Producción en Render
+    "http://127.0.0.1:3000",      # Localhost alternativo
+    "http://127.0.0.1:5173",      # Localhost alternativo
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -198,7 +206,7 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
         await progress_manager.send_progress(session_id, 80, "🤖 Analizando toxicidad con IA...")
         
         try:
-            from server.ml.pipeline import ToxicityPipeline
+            from ml.pipeline import ToxicityPipeline
             pipeline = ToxicityPipeline()
             
             logger.info("🤖 Pipeline de toxicidad inicializado correctamente")
@@ -261,7 +269,7 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
             if video_id_from_data:
                 # Obtener el video por youtube_video_id
                 session = database.open_session()
-                from server.database.models import Video, Request
+                from database.models import Video, Request
                 
                 video = session.query(Video).filter_by(youtube_video_id=video_id_from_data).first()
                 if video:
@@ -326,7 +334,3 @@ async def process_video_analysis(video_url: str, session_id: str, max_comments: 
         traceback.print_exc()
         await progress_manager.send_completion(session_id, False, error=str(e))
 
-
-if __name__ == "__main__":
-    #import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)

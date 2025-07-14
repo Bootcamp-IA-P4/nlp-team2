@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const ProgressLoader = ({ sessionId, onComplete, onError, maxComments }) => {
   const [progress, setProgress] = useState(0);
@@ -13,7 +14,9 @@ const ProgressLoader = ({ sessionId, onComplete, onError, maxComments }) => {
 
     console.log('🎯 Iniciando WebSocket para session:', sessionId);
     
-    const ws = new WebSocket(`ws://localhost:8000/ws/${sessionId}`);
+    // Crear URL WebSocket basada en la configuración de API
+    const wsUrl = API_BASE_URL.replace('http', 'ws').replace('https', 'wss');
+    const ws = new WebSocket(`${wsUrl}/ws/${sessionId}`);
     setWebsocket(ws);
 
     ws.onopen = () => {
@@ -213,7 +216,7 @@ const ProgressLoader = ({ sessionId, onComplete, onError, maxComments }) => {
         </div>
 
         {/* Debug info MEJORADO */}
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.MODE === 'development' && (
           <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono">
             <div><strong>🔧 Debug Info:</strong></div>
             <div>Session ID: {sessionId}</div>

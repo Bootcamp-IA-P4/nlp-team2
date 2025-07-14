@@ -48,7 +48,7 @@ const Header = () => {
             </div>
             <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-accent-500 dark:border-accent-400 shadow-md hover:shadow-lg hover:border-accent-600 dark:hover:border-accent-300 transition-all duration-300 cursor-pointer">
               <img
-                src="../public/img/iconGojira.png"
+                src="/img/icongojira.png"
                 alt="Admin Avatar"
                 className="h-full w-full object-cover object-center hover:scale-110 transition-transform duration-300"
               />

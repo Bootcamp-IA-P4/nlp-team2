@@ -3,6 +3,7 @@ import AppMetadata from './AppMetadata';
 import { Play, AlertTriangle, MessageCircle, TrendingUp, Clock, Send, Video, CheckCircle, XCircle, BarChart3, Settings } from 'lucide-react';
 import axios from 'axios';
 import ProgressLoader from './ProgressLoader';
+import { API_BASE_URL } from '../config';
 
 const AnalyzeTab = () => {
   const [youtubeUrl, setYoutubeUrl] = useState('');
@@ -80,7 +81,7 @@ const AnalyzeTab = () => {
 
     try {
       // ✅ INCLUIR maxComments en la petición
-      const response = await axios.post('http://localhost:8000/v1/analyze_video_with_ml', {
+      const response = await axios.post(`${API_BASE_URL}/v1/analyze_video_with_ml`, {
         url: youtubeUrl,
         max_comments: maxComments
       });
@@ -127,7 +128,7 @@ const AnalyzeTab = () => {
     setError('');
 
     try {
-      const response = await axios.post('http://localhost:8000/api/v1/toxicity/analyze-comment', {
+      const response = await axios.post(`${API_BASE_URL}/api/v1/toxicity/analyze-comment`, {
         comment: comment
       });
 

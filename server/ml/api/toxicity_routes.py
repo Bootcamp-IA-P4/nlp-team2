@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import logging
-from server.ml.pipeline import ToxicityPipeline
+from ml.pipeline import ToxicityPipeline
 
 # Configurar router
 router = APIRouter(prefix="/api/v1/toxicity", tags=["toxicity"])

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../config';
 
 export const useAppInfo = () => {
   const [appInfo, setAppInfo] = useState({
@@ -10,13 +11,14 @@ export const useAppInfo = () => {
     error: null
   });
 
+  
   useEffect(() => {
     const fetchAppInfo = async () => {
       try {
         console.log('🔍 Obteniendo información de la API...');
         
         //ENDPOINT DE FASTAPI
-        const response = await fetch('http://localhost:8000/', {
+        const response = await fetch(`${API_BASE_URL}/`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',

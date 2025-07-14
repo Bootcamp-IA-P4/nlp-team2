@@ -1,0 +1,96 @@
+# Archivos de Git
+.git
+.gitignore
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+.env
+
+# Directorios de node_modules
+node_modules/
+
+# Cache de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Archivos de coverage y reportes de testing
+htmlcov/
+.coverage
+coverage/
+.pytest_cache/
+.tox/
+
+# Directorio de tests completo
+tests/
+
+# Archivos de logs
+logs/
+*.log
+
+# Archivos de Jupyter y EDA (no existen en server/)
+.ipynb_checkpoints/
+
+# Archivos de VSCode y desarrollo
+.vscode/
+.qodo/
+
+# Archivos de configuración de desarrollo
+.coveragerc
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Documentación y archivos README de desarrollo
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+
+# Archivos de desarrollo adicionales
+.coverage*
+pytest.ini
+conftest.py
+run_coverage.*
+requirements.txt
+.gitignore
+
+# Archivos de Docker (no necesarios dentro del contenedor)
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# Archivos de CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Archivos de editores y IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# Archivos de respaldo
+*.bak
+*.backup
+*.orig
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Tests (opcional - descomenta si no quieres incluir tests)
+tests/
+test_*.py
+*_test.py
+conftest.py
+pytest.ini
+run_coverage.*
