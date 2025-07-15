@@ -207,7 +207,7 @@ nlp-team2/
 ## 🏗️ Architecture Diagram
 
 <div align="center">
-  <img src="https://res.cloudinary.com/diowtsfaq/image/upload/v1747050292/Capture_nshpys.png" alt="Descripción de la imagen" width="900" height="450">
+  <img src="https://res.cloudinary.com/diowtsfaq/image/upload/v1752538627/modzilla_yb2gdu.jpg" alt="Descripción de la imagen" width="900" height="450">
 </div>
 
 ## ⚙️ Installation and Usage
